@@ -10,10 +10,49 @@ import {
 import { useDocumentData } from '../../hooks/useDocumentData';
 import { DocumentNode, FileNode } from '../../interfaces/common';
 import { Folder, FileText, ChevronRight, ChevronDown } from 'lucide-react';
+import { UploadDropZone } from '../UploadDropZone/UploadDropZone';
+import { UploadProgressIndicator } from '../UploadProgressIndicator/UploadProgressIndicator';
+import { useUploadQueue } from '../../hooks/useUploadQueue';
+import { ALLOWED_FILE_TYPES } from '@/lib/constants';
 
 export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNode) => void }) {
   const { documents } = useDocumentData();
+  const { uploads, addFiles, cancelUpload, cancelAllUploads, clearCompleted } = useUploadQueue(5);
+
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
+  const [localDocs, setLocalDocs] = React.useState<DocumentNode[]>([]);
+  const [searchTerm, setSearchTerm] = React.useState('');
+
+  React.useEffect(() => {
+    setLocalDocs(documents);
+  }, [documents]);
+
+  const filterNodes = React.useCallback((nodes: DocumentNode[], term: string): DocumentNode[] => {
+    if (!term) return nodes;
+    const lower = term.toLowerCase();
+    return nodes
+      .map((n) => {
+        if (n.type === 'folder') {
+          const children = filterNodes(n.children ?? [], term);
+          if (n.name.toLowerCase().includes(lower) || children.length) {
+            return { ...n, children } as DocumentNode;
+          }
+          return null;
+        }
+        return n.name.toLowerCase().includes(lower) ? n : null;
+      })
+      .filter(Boolean) as DocumentNode[];
+  }, []);
+
+  const filteredDocuments = React.useMemo(
+    () => filterNodes(localDocs, searchTerm),
+    [localDocs, searchTerm, filterNodes],
+  );
+
+  const handleFilesAppend = async (newFiles: File[], folderName?: string) => {
+    // Add files to the upload queue for parallel processing
+    addFiles(newFiles, folderName);
+  };
 
   const columns = React.useMemo<ColumnDef<DocumentNode>[]>(
     () => [
@@ -46,7 +85,7 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
                 <span className='w-5 h-5 inline-flex items-center justify-center text-gray-300' />
               )}
               {isFolder ? (
-                <Folder className='h-4 w-4 text-amber-500' />
+                <Folder className='h-4 w-4 text-orange-600' />
               ) : (
                 <FileText className='h-4 w-4 text-gray-400' />
               )}
@@ -104,7 +143,7 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
   );
 
   const table = useReactTable({
-    data: documents,
+    data: filteredDocuments,
     columns,
     state: { expanded },
     getSubRows: (row) => row.children ?? [],
@@ -119,9 +158,23 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
         <h1 className='text-xl font-semibold'>Vault</h1>
       </header>
       <main className='flex-1 overflow-y-auto'>
-        {/* add search bar*/}
-        {/* Also supports upload document funcitonality */}
-        <div className='overflow-x-auto rounded border border-gray-200 bg-white'>
+        <UploadDropZone
+          allowFileTypes={ALLOWED_FILE_TYPES}
+          onUploadFiles={handleFilesAppend}
+          allowFolders={true}
+        />
+        {/* Search */}
+        <div className='p-3 border-b border-gray-200'>
+          <input
+            type='search'
+            placeholder='Search documents...'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className='w-full rounded border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-600 focus:border-orange-600'
+          />
+        </div>
+        {/* Table */}
+        <div className='overflow-x-auto rounded border border-gray-200 bg-white mx-3 mb-4'>
           <table className='w-full text-sm'>
             <thead className='bg-gray-50 text-gray-700'>
               {table.getHeaderGroups().map((hg) => (
@@ -153,6 +206,14 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
           </table>
         </div>
       </main>
+
+      {/* Upload Progress Indicator */}
+      <UploadProgressIndicator
+        uploads={uploads}
+        onCancel={cancelUpload}
+        onCancelAll={cancelAllUploads}
+        onClearCompleted={clearCompleted}
+      />
     </section>
   );
 }

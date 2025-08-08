@@ -13,7 +13,7 @@ export interface BaseNode {
 
 export interface FileNode extends BaseNode {
   type: 'file';
-  fileType: 'pdf' | 'docx' | 'xlsx' | 'pptx';
+  fileType: 'pdf' | 'docx';
   children?: never;
 }
 
