@@ -4,15 +4,11 @@ import { UploadProgress } from '../../services/uploadQueue';
 
 interface UploadProgressIndicatorProps {
   uploads: UploadProgress[];
-  onCancel?: (id: string) => void;
-  onCancelAll?: () => void;
   onClearCompleted?: () => void;
 }
 
 export const UploadProgressIndicator: React.FC<UploadProgressIndicatorProps> = ({
   uploads,
-  onCancel,
-  onCancelAll,
   onClearCompleted,
 }) => {
   if (uploads.length === 0) {
@@ -51,15 +47,6 @@ export const UploadProgressIndicator: React.FC<UploadProgressIndicatorProps> = (
               Clear
             </button>
           )}
-          {isActive && (
-            <button
-              onClick={onCancelAll}
-              className='text-xs px-2 py-1 text-red-600 hover:text-red-800 hover:bg-red-100 rounded'
-              title='Cancel all uploads'
-            >
-              Cancel All
-            </button>
-          )}
         </div>
       </div>
 
@@ -86,7 +73,7 @@ export const UploadProgressIndicator: React.FC<UploadProgressIndicatorProps> = (
       {/* Upload List */}
       <div className='max-h-64 overflow-y-auto'>
         {uploads.map((upload) => (
-          <UploadItem key={upload.id} upload={upload} onCancel={onCancel} />
+          <UploadItem key={upload.id} upload={upload} />
         ))}
       </div>
     </div>

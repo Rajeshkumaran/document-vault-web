@@ -16,8 +16,14 @@ import { useUploadQueue } from '../../hooks/useUploadQueue';
 import { ALLOWED_FILE_TYPES } from '@/lib/constants';
 
 export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNode) => void }) {
-  const { documents } = useDocumentData();
-  const { uploads, addFiles, cancelUpload, cancelAllUploads, clearCompleted } = useUploadQueue(5);
+  const { documents, refetch } = useDocumentData();
+
+  // Callback when all uploads are complete
+  const handleAllUploadsComplete = React.useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  const { uploads, addFiles, clearCompleted } = useUploadQueue(5, handleAllUploadsComplete);
 
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
   const [localDocs, setLocalDocs] = React.useState<DocumentNode[]>([]);
@@ -208,12 +214,7 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
       </main>
 
       {/* Upload Progress Indicator */}
-      <UploadProgressIndicator
-        uploads={uploads}
-        onCancel={cancelUpload}
-        onCancelAll={cancelAllUploads}
-        onClearCompleted={clearCompleted}
-      />
+      <UploadProgressIndicator uploads={uploads} onClearCompleted={clearCompleted} />
     </section>
   );
 }

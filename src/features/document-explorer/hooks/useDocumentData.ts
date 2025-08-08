@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { DocumentNode } from '../interfaces/common';
+import { axiosClient } from '@/lib/axiosClient';
 
 // Mock hierarchical documents data
 const mockDocuments: DocumentNode[] = [
@@ -84,13 +85,33 @@ export function useDocumentData() {
 
   useEffect(() => {
     setLoading(true);
-    // Simulate async fetch
-    const timer = setTimeout(() => {
-      setDocuments(mockDocuments);
-      setLoading(false);
-    }, 120);
-    return () => clearTimeout(timer);
+    axiosClient
+      .get<DocumentNode[]>('/api/v1/documents')
+      .then((response) => {
+        setDocuments(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching documents:', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
-  return { documents, loading };
+  const refetch = () => {
+    setLoading(true);
+    axiosClient
+      .get<DocumentNode[]>('/api/v1/documents')
+      .then((response) => {
+        setDocuments(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching documents:', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  return { documents, loading, refetch };
 }

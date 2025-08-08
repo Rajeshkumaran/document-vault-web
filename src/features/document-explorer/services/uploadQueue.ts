@@ -21,11 +21,18 @@ export class UploadQueue {
   private activeUploads: Map<string, AbortController> = new Map();
   private maxConcurrentUploads = 3;
   private onProgressUpdate?: (progress: UploadProgress[]) => void;
+  private onAllUploadsComplete?: () => void;
   private progressMap: Map<string, UploadProgress> = new Map();
+  private batchTracker: Set<string> = new Set(); // Track current batch uploads
 
-  constructor(maxConcurrentUploads = 3, onProgressUpdate?: (progress: UploadProgress[]) => void) {
+  constructor(
+    maxConcurrentUploads = 3,
+    onProgressUpdate?: (progress: UploadProgress[]) => void,
+    onAllUploadsComplete?: () => void,
+  ) {
     this.maxConcurrentUploads = maxConcurrentUploads;
     this.onProgressUpdate = onProgressUpdate;
+    this.onAllUploadsComplete = onAllUploadsComplete;
   }
 
   addFiles(files: File[], folderName?: string, folderId?: string): string[] {
@@ -42,6 +49,9 @@ export class UploadQueue {
         status: 'pending',
         progress: 0,
       });
+
+      // Add to current batch tracker
+      this.batchTracker.add(id);
 
       ids.push(id);
     });
@@ -116,6 +126,9 @@ export class UploadQueue {
 
       // Continue processing queue
       this.processQueue();
+
+      // Check if all uploads are complete
+      this.checkAllUploadsComplete();
     }
   }
 
@@ -130,6 +143,34 @@ export class UploadQueue {
   private notifyProgressUpdate(): void {
     if (this.onProgressUpdate) {
       this.onProgressUpdate(Array.from(this.progressMap.values()));
+    }
+  }
+
+  private checkAllUploadsComplete(): void {
+    // Check if there are items in the batch tracker that are still pending/uploading
+    let allBatchItemsComplete = true;
+    let hasCompletedItems = false;
+
+    for (const id of this.batchTracker) {
+      const progress = this.progressMap.get(id);
+      if (progress) {
+        if (progress.status === 'pending' || progress.status === 'uploading') {
+          allBatchItemsComplete = false;
+          break;
+        }
+        if (progress.status === 'completed') {
+          hasCompletedItems = true;
+        }
+      }
+    }
+
+    // If all batch items are complete and we have completed items, trigger callback
+    if (allBatchItemsComplete && hasCompletedItems && this.batchTracker.size > 0) {
+      if (this.onAllUploadsComplete) {
+        this.onAllUploadsComplete();
+      }
+      // Clear the batch tracker for next batch
+      this.batchTracker.clear();
     }
   }
 
@@ -185,7 +226,10 @@ export class UploadQueue {
       }
     });
 
-    toRemove.forEach((id) => this.progressMap.delete(id));
+    toRemove.forEach((id) => {
+      this.progressMap.delete(id);
+      this.batchTracker.delete(id); // Also remove from batch tracker
+    });
     this.notifyProgressUpdate();
   }
 

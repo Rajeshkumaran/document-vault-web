@@ -2,15 +2,30 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { generateUUID } from '@/lib/utils';
 import { UploadQueue, UploadProgress } from '../services/uploadQueue';
 
-export const useUploadQueue = (maxConcurrentUploads = 3) => {
+export const useUploadQueue = (maxConcurrentUploads = 3, onAllUploadsComplete?: () => void) => {
   const [uploads, setUploads] = useState<UploadProgress[]>([]);
   const queueRef = useRef<UploadQueue | null>(null);
+  const callbackRef = useRef(onAllUploadsComplete);
+
+  // Update callback ref when it changes
+  useEffect(() => {
+    callbackRef.current = onAllUploadsComplete;
+  }, [onAllUploadsComplete]);
 
   useEffect(() => {
     // Initialize upload queue
-    queueRef.current = new UploadQueue(maxConcurrentUploads, (progress) => {
-      setUploads([...progress]);
-    });
+    queueRef.current = new UploadQueue(
+      maxConcurrentUploads,
+      (progress) => {
+        setUploads([...progress]);
+      },
+      () => {
+        // Use the latest callback from ref
+        if (callbackRef.current) {
+          callbackRef.current();
+        }
+      },
+    );
 
     return () => {
       // Cleanup on unmount
@@ -18,24 +33,12 @@ export const useUploadQueue = (maxConcurrentUploads = 3) => {
         queueRef.current.cancelAllUploads();
       }
     };
-  }, [maxConcurrentUploads]);
+  }, [maxConcurrentUploads]); // Remove onAllUploadsComplete from dependencies
 
   const addFiles = useCallback((files: File[], folderName?: string): string[] => {
     if (!queueRef.current) return [];
     const folderId = generateUUID();
     return queueRef.current.addFiles(files, folderName, folderId);
-  }, []);
-
-  const cancelUpload = useCallback((id: string) => {
-    if (queueRef.current) {
-      queueRef.current.cancelUpload(id);
-    }
-  }, []);
-
-  const cancelAllUploads = useCallback(() => {
-    if (queueRef.current) {
-      queueRef.current.cancelAllUploads();
-    }
   }, []);
 
   const clearCompleted = useCallback(() => {
@@ -63,8 +66,6 @@ export const useUploadQueue = (maxConcurrentUploads = 3) => {
   return {
     uploads,
     addFiles,
-    cancelUpload,
-    cancelAllUploads,
     clearCompleted,
     isActive,
     getStats,
