@@ -8,75 +8,100 @@ import {
   ExpandedState,
 } from '@tanstack/react-table';
 import { useDocumentData } from '../../hooks/useDocumentData';
-import { DocumentNode } from '../../interfaces/common';
+import { DocumentNode, FileNode } from '../../interfaces/common';
 import { Folder, FileText, ChevronRight, ChevronDown } from 'lucide-react';
 
-const columns: ColumnDef<DocumentNode>[] = [
-  {
-    id: 'name',
-    header: () => <span>Name</span>,
-    cell: ({ row }) => {
-      const isFolder = row.original.type === 'folder';
-      const hasChildren = !!row.original.children?.length;
-      const expanded = row.getIsExpanded();
-      return (
-        <div
-          style={{ paddingLeft: `${row.depth * 1.25}rem` }}
-          className='flex items-center gap-1.5'
-        >
-          {hasChildren ? (
-            <button
-              onClick={row.getToggleExpandedHandler()}
-              className='w-5 h-5 flex items-center justify-center rounded hover:bg-gray-200 text-gray-600'
-              aria-label={expanded ? 'Collapse' : 'Expand'}
-            >
-              {expanded ? (
-                <ChevronDown className='h-4 w-4' />
-              ) : (
-                <ChevronRight className='h-4 w-4' />
-              )}
-            </button>
-          ) : (
-            <span className='w-5 h-5 inline-flex items-center justify-center text-gray-300' />
-          )}
-          {isFolder ? (
-            <Folder className='h-4 w-4 text-amber-500' />
-          ) : (
-            <FileText className='h-4 w-4 text-gray-400' />
-          )}
-          <span className={isFolder ? 'font-medium text-gray-900' : 'text-gray-700'}>
-            {row.original.name}
-          </span>
-        </div>
-      );
-    },
-    accessorFn: (row: DocumentNode) => row.name,
-  },
-  {
-    id: 'fileType',
-    header: () => <span>File Type</span>,
-    accessorFn: (row) => (row.type === 'file' ? row.fileType : ''),
-    cell: ({ getValue }) => {
-      const fileType = getValue() as string;
-      return <span className='text-gray-500 text-sm capitalize'>{fileType}</span>;
-    },
-  },
-  {
-    id: 'createdAt',
-    header: () => <span>Created</span>,
-    accessorKey: 'createdAt',
-    cell: ({ getValue }) => {
-      const createdAt = getValue() as string;
-      return (
-        <span className='text-gray-500 text-sm'>{new Date(createdAt).toLocaleDateString()}</span>
-      );
-    },
-  },
-];
-
-export function DocumentsExplorer() {
+export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNode) => void }) {
   const { documents } = useDocumentData();
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
+
+  const columns = React.useMemo<ColumnDef<DocumentNode>[]>(
+    () => [
+      {
+        id: 'name',
+        header: () => <span>Name</span>,
+        cell: ({ row }) => {
+          const isFolder = row.original.type === 'folder';
+          const hasChildren = !!row.original.children?.length;
+          const expanded = row.getIsExpanded();
+          return (
+            <div
+              style={{ paddingLeft: `${row.depth * 1.25}rem` }}
+              className='flex items-center gap-1.5'
+            >
+              {hasChildren ? (
+                <button
+                  onClick={row.getToggleExpandedHandler()}
+                  className='w-5 h-5 flex items-center justify-center rounded hover:bg-gray-200 text-gray-600'
+                  aria-label={expanded ? 'Collapse' : 'Expand'}
+                  type='button'
+                >
+                  {expanded ? (
+                    <ChevronDown className='h-4 w-4' />
+                  ) : (
+                    <ChevronRight className='h-4 w-4' />
+                  )}
+                </button>
+              ) : (
+                <span className='w-5 h-5 inline-flex items-center justify-center text-gray-300' />
+              )}
+              {isFolder ? (
+                <Folder className='h-4 w-4 text-amber-500' />
+              ) : (
+                <FileText className='h-4 w-4 text-gray-400' />
+              )}
+              <span
+                className={
+                  isFolder
+                    ? 'font-medium text-gray-900'
+                    : 'text-gray-700 cursor-pointer hover:underline'
+                }
+                onClick={() => {
+                  if (!isFolder && onFileClick) {
+                    onFileClick(row.original as FileNode);
+                  }
+                }}
+                role={!isFolder ? 'button' : undefined}
+                tabIndex={!isFolder ? 0 : undefined}
+                onKeyDown={(e) => {
+                  if (!isFolder && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    onFileClick?.(row.original as FileNode);
+                  }
+                }}
+              >
+                {row.original.name}
+              </span>
+            </div>
+          );
+        },
+        accessorFn: (row: DocumentNode) => row.name,
+      },
+      {
+        id: 'fileType',
+        header: () => <span>File Type</span>,
+        accessorFn: (row) => (row.type === 'file' ? row.fileType : ''),
+        cell: ({ getValue }) => {
+          const fileType = getValue() as string;
+          return <span className='text-gray-500 text-sm capitalize'>{fileType}</span>;
+        },
+      },
+      {
+        id: 'createdAt',
+        header: () => <span>Created</span>,
+        accessorKey: 'createdAt',
+        cell: ({ getValue }) => {
+          const createdAt = getValue() as string;
+          return (
+            <span className='text-gray-500 text-sm'>
+              {new Date(createdAt).toLocaleDateString()}
+            </span>
+          );
+        },
+      },
+    ],
+    [onFileClick],
+  );
 
   const table = useReactTable({
     data: documents,
@@ -94,6 +119,8 @@ export function DocumentsExplorer() {
         <h1 className='text-xl font-semibold'>Vault</h1>
       </header>
       <main className='flex-1 overflow-y-auto'>
+        {/* add search bar*/}
+        {/* Also supports upload document funcitonality */}
         <div className='overflow-x-auto rounded border border-gray-200 bg-white'>
           <table className='w-full text-sm'>
             <thead className='bg-gray-50 text-gray-700'>
