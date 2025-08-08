@@ -12,11 +12,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Removed automatic dark mode so the app stays white-based.
+   If dark mode is reintroduced, toggle a .dark class on <html> and define overrides below. */
+.dark :root {
+  /* Example future dark overrides (currently commented to keep white theme) */
+  /* --background: #0a0a0a; */
+  /* --foreground: #ededed; */
 }
 
 body {
