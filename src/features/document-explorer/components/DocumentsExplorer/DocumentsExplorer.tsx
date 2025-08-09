@@ -27,34 +27,6 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
   const { uploads, addFiles, clearCompleted } = useUploadQueue(5, handleAllUploadsComplete);
 
   const [expanded, setExpanded] = React.useState<ExpandedState>({});
-  const [localDocs, setLocalDocs] = React.useState<DocumentNode[]>([]);
-  const [searchTerm, setSearchTerm] = React.useState('');
-
-  React.useEffect(() => {
-    setLocalDocs(documents);
-  }, [documents]);
-
-  const filterNodes = React.useCallback((nodes: DocumentNode[], term: string): DocumentNode[] => {
-    if (!term) return nodes;
-    const lower = term.toLowerCase();
-    return nodes
-      .map((n) => {
-        if (n.type === 'folder') {
-          const children = filterNodes(n.children ?? [], term);
-          if (n.name.toLowerCase().includes(lower) || children.length) {
-            return { ...n, children } as DocumentNode;
-          }
-          return null;
-        }
-        return n.name.toLowerCase().includes(lower) ? n : null;
-      })
-      .filter(Boolean) as DocumentNode[];
-  }, []);
-
-  const filteredDocuments = React.useMemo(
-    () => filterNodes(localDocs, searchTerm),
-    [localDocs, searchTerm, filterNodes],
-  );
 
   const handleFilesAppend = async (newFiles: File[], folderName?: string) => {
     // Add files to the upload queue for parallel processing
@@ -146,7 +118,7 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
   );
 
   const table = useReactTable({
-    data: filteredDocuments,
+    data: documents,
     columns,
     state: { expanded },
     getSubRows: (row) => row.children ?? [],
@@ -166,16 +138,7 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
           onUploadFiles={handleFilesAppend}
           allowFolders={true}
         />
-        {/* Search */}
-        <div className='p-3 border-b border-gray-200'>
-          <input
-            type='search'
-            placeholder='Search documents...'
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className='w-full rounded border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-600 focus:border-orange-600'
-          />
-        </div>
+
         {/* Table */}
         <div className='overflow-x-auto rounded border border-gray-200 bg-white mx-3 mb-4'>
           <table className='w-full text-sm'>
