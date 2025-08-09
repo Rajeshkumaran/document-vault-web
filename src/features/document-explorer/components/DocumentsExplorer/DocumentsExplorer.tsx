@@ -45,7 +45,7 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
           return (
             <div
               style={{ paddingLeft: `${row.depth * 1.25}rem` }}
-              className='flex items-center gap-1.5'
+              className={`flex items-center gap-1.5`}
             >
               {hasChildren ? (
                 <button

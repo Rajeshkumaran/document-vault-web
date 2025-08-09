@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Upload } from 'lucide-react';
+import { useDragAndDrop } from '../../hooks/useDragAndDrop';
 
 interface UploadDropZoneProps {
   allowFileTypes: string[];
@@ -12,95 +13,31 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
   onUploadFiles,
   allowFolders = false,
 }) => {
-  const [dragActive, setDragActive] = React.useState(false);
   const [uploadMode, setUploadMode] = React.useState<'files' | 'folders'>('files');
   const [customFolderName, setCustomFolderName] = React.useState<string>('');
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-  const [error, setError] = React.useState<string | null>(null);
 
-  // Clear error after 5s
-  React.useEffect(() => {
-    if (!error) return;
-    const t = setTimeout(() => setError(null), 5000);
-    return () => clearTimeout(t);
-  }, [error]);
+  const { dragActive, error, handleFiles, handleDragOver, handleDragLeave, handleDrop } =
+    useDragAndDrop({
+      allowFileTypes,
+      onUploadFiles: (files, folderName) => {
+        onUploadFiles(files, folderName);
+        setCustomFolderName('');
+      },
+    });
 
-  const normalisedTypes = React.useMemo(
-    () => allowFileTypes.map((t) => t.trim().toLowerCase()).filter(Boolean),
-    [allowFileTypes],
-  );
-
-  const isFileAllowed = React.useCallback(
-    (file: File) => {
-      const ext = file.name.split('.').pop()?.toLowerCase() || '';
-      const dotExt = '.' + ext;
-      return (
-        normalisedTypes.includes(ext) ||
-        normalisedTypes.includes(dotExt) ||
-        normalisedTypes.includes(file.type.toLowerCase())
-      );
-    },
-    [normalisedTypes],
-  );
-
-  const handleFiles = React.useCallback(
-    (files: File[]) => {
-      if (!files.length) return;
-      const allowed: File[] = [];
-      const rejected: File[] = [];
-      files.forEach((f) => (isFileAllowed(f) ? allowed.push(f) : rejected.push(f)));
-      if (rejected.length) {
-        const names = rejected
-          .slice(0, 3)
-          .map((f) => f.name)
-          .join(', ');
-        setError(
-          `${rejected.length} unsupported file${rejected.length > 1 ? 's' : ''}: ${names}$${
-            rejected.length > 3 ? '…' : ''
-          }`,
-        );
-      }
-      if (!allowed.length) return;
-
-      // Determine folder name
-      let folderName = customFolderName.trim();
-      if (!folderName && allowed[0]?.webkitRelativePath) {
-        // Extract from file path if available
-        const pathParts = allowed[0].webkitRelativePath.split('/');
-        if (pathParts.length > 1) {
-          folderName = pathParts[0];
-        }
-      }
-
-      onUploadFiles(allowed, folderName || undefined);
-      setCustomFolderName('');
-    },
-    [onUploadFiles, isFileAllowed, customFolderName],
-  );
-
-  const handleUploadInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    handleFiles(files);
+    handleFiles(files, customFolderName);
     e.target.value = '';
+    setCustomFolderName('');
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDropWithCustomFolder = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!dragActive) setDragActive(true);
-  };
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if ((e.target as HTMLElement).id === 'drop-zone') setDragActive(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
     const files = Array.from(e.dataTransfer.files ?? []);
-    handleFiles(files);
+    handleFiles(files, customFolderName);
   };
 
   return (
@@ -116,7 +53,7 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
         onDragEnter={handleDragOver}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
+        onDrop={customFolderName ? handleDropWithCustomFolder : handleDrop}
         onClick={() => fileInputRef.current?.click()}
         role='button'
         tabIndex={0}
@@ -201,7 +138,7 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
           type='file'
           multiple
           accept={allowFileTypes.join(',')}
-          onChange={handleUploadInput}
+          onChange={handleFileInputChange}
           className='hidden'
         />
       </div>
@@ -211,7 +148,7 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
           role='alert'
           className='mx-4 mb-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded px-2 py-1'
         >
-          {error.replace('$', '')}
+          {error}
         </p>
       )}
     </>
