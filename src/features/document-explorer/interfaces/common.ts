@@ -13,14 +13,16 @@ export interface BaseNode {
 
 export interface FileNode extends BaseNode {
   type: 'file';
-  fileType: 'pdf' | 'docx';
+  file_type: 'pdf' | 'docx' | 'pptx' | 'xlsx' | 'txt' | 'jpg' | 'jpeg' | 'png' | 'gif' | 'webp';
+  url?: string; // Firebase Storage URL
   children?: never;
+  storage_path?: string; // Firebase Storage path
 }
 
 export interface FolderNode extends BaseNode {
   type: 'folder';
   children?: DocumentNode[]; // recursive
-  fileType?: never;
+  file_type?: never;
 }
 
 export type DocumentNode = FileNode | FolderNode;

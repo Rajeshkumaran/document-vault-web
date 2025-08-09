@@ -14,6 +14,7 @@ import { UploadDropZone } from '../UploadDropZone/UploadDropZone';
 import { UploadProgressIndicator } from '../UploadProgressIndicator/UploadProgressIndicator';
 import { useUploadQueue } from '../../hooks/useUploadQueue';
 import { ALLOWED_FILE_TYPES } from '@/lib/constants';
+import { parseISOWithMicros } from '../../utils/helpers';
 
 export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNode) => void }) {
   const { documents, refetch } = useDocumentData();
@@ -125,23 +126,26 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
       {
         id: 'fileType',
         header: () => <span>File Type</span>,
-        accessorFn: (row) => (row.type === 'file' ? row.fileType : ''),
+        accessorFn: (row) => row.file_type,
         cell: ({ getValue }) => {
           const fileType = getValue() as string;
+          console.log('Debugger dates', {
+            fileType,
+          });
           return <span className='text-gray-500 text-sm capitalize'>{fileType}</span>;
         },
       },
       {
         id: 'createdAt',
         header: () => <span>Created</span>,
-        accessorKey: 'createdAt',
+        accessorKey: 'created_at',
         cell: ({ getValue }) => {
           const createdAt = getValue() as string;
-          return (
-            <span className='text-gray-500 text-sm'>
-              {new Date(createdAt).toLocaleDateString()}
-            </span>
-          );
+          console.log('Debugger dates', {
+            createdAt,
+            format: parseISOWithMicros(createdAt),
+          });
+          return <span className='text-gray-500 text-sm'>{parseISOWithMicros(createdAt)}</span>;
         },
       },
     ],

@@ -16,6 +16,7 @@ const mockDocuments: DocumentNode[] = [
         createdAt: '2025-08-02T09:15:00Z',
         type: 'file',
         fileType: 'pdf',
+        url: 'https://storage.googleapis.com/document-vault-d9b8b.firebasestorage.app/Resume%20Gokul%20Prasanth%20P%20copy_1f2fbf177848412596ac2101f3e07065.pdf?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=firebase-adminsdk-fbsvc%40document-vault-d9b8b.iam.gserviceaccount.com%2F20250808%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20250808T205026Z&X-Goog-Expires=604799&X-Goog-SignedHeaders=host&X-Goog-Signature=7437f546e3f07bb8d5a1069f7d0246a6420aa86ccc7d209fcc629d0a50beb8a78362011ffde604a55c6625f10e891fe367c9c7cc99b72d33bdafc15aa96325e130e0c01bdc7f90f503ea44b3f44e1429a8f7e155ec1602aeb7d49690cc07a5448af168bf7a1d0cf306bf6f19839ddab48e686f2078f7769e6c7c6166306ac775e6ed23b69d05a8633d4802251a9de7dd053080c19a6e459f2ba5b82158e6801d32e98cc6f325fbcb01a0e6cc20af9c6e0067f3b8caf09249eb3d749991bec1fc2dedf9bd227de8bdb29d7faeaf2e69a5db420db8bfa46fbfb733169f0cc681edb70952cd5c869610ed14cac24a58d29ba9bc1c3392486530f99f18b7ca484013',
       },
       {
         id: 'proj-2-folder',
@@ -69,13 +70,14 @@ const mockDocuments: DocumentNode[] = [
     createdAt: '2025-08-06T07:10:00Z',
     type: 'file',
     fileType: 'pdf',
+    url: 'https://storage.googleapis.com/document-vault-d9b8b.firebasestorage.app/sample-document.pdf',
   },
   {
     id: 'readme-file',
     name: 'README.txt',
     createdAt: '2025-08-07T09:00:00Z',
     type: 'file',
-    fileType: 'pdf',
+    fileType: 'txt',
   },
 ];
 

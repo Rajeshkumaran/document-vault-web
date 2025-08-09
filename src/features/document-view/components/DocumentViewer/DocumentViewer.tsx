@@ -1,16 +1,17 @@
 import * as React from 'react';
-import type { DocumentMeta } from '../../interfaces/common';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/atoms/Tabs/Tabs';
 import { SummaryView } from '../SummaryView/SummaryView';
 import { PreviewView } from '../PreviewView/PreviewView';
 
 interface DocumentViewerProps {
   documentId: string;
+  fileUrl?: string;
+  fileName?: string;
+  fileType?: string;
 }
 
-export function DocumentViewer({ documentId, onFileClick }: DocumentViewerProps) {
-  const [doc, setDoc] = React.useState<DocumentMeta | null>(null);
-  const [tab, setTab] = React.useState<'summary' | 'preview'>('summary');
+export function DocumentViewer({ documentId, fileUrl, fileName, fileType }: DocumentViewerProps) {
+  const [tab, setTab] = React.useState<'summary' | 'preview'>('preview');
 
   return (
     <div className='flex flex-col border border-gray-200 rounded-lg bg-white shadow-sm h-full'>
@@ -21,15 +22,21 @@ export function DocumentViewer({ documentId, onFileClick }: DocumentViewerProps)
       <Tabs
         value={tab}
         onValueChange={(v: string) => setTab(v as 'summary' | 'preview')}
-        className='flex flex-col'
+        className='flex flex-col flex-1'
       >
         <TabsList className='mt-2'>
           <TabsTrigger value='preview'>Preview</TabsTrigger>
           <TabsTrigger value='summary'>Summary</TabsTrigger>
         </TabsList>
-        <div className='p-5 flex-1 overflow-auto'>
-          <TabsContent value='preview'>{tab === 'preview' && <PreviewView />}</TabsContent>
-          <TabsContent value='summary'>{tab === 'summary' && <SummaryView />}</TabsContent>
+        <div className='p-5 flex-1 min-h-0'>
+          <TabsContent value='preview' className='h-full'>
+            {tab === 'preview' && (
+              <PreviewView fileUrl={fileUrl} fileName={fileName} fileType={fileType} />
+            )}
+          </TabsContent>
+          <TabsContent value='summary' className='h-full'>
+            {tab === 'summary' && <SummaryView />}
+          </TabsContent>
         </div>
       </Tabs>
     </div>

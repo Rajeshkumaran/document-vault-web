@@ -6,7 +6,10 @@ import { FileNode } from '@/features/document-explorer/interfaces';
 
 export default function VaultPage() {
   const [showDocumentViewer, toggleDocumentViewer] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<FileNode | null>(null);
+
   const handleFileClick = (file: FileNode) => {
+    setSelectedFile(file);
     toggleDocumentViewer(true);
   };
 
@@ -16,9 +19,14 @@ export default function VaultPage() {
         <div className='flex-1 min-h-0 overflow-auto'>
           <DocumentsExplorer onFileClick={handleFileClick} />
         </div>
-        {showDocumentViewer && (
+        {showDocumentViewer && selectedFile && (
           <div className='flex-1 min-h-0 overflow-auto'>
-            <DocumentViewer documentId='1' />
+            <DocumentViewer
+              documentId={selectedFile.id}
+              fileUrl={selectedFile.storage_path} // Assuming FileNode has a storage_path property
+              fileName={selectedFile.name}
+              fileType={selectedFile.file_type}
+            />
           </div>
         )}
       </div>
