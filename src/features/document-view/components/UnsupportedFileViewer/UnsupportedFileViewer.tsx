@@ -2,15 +2,19 @@ import * as React from 'react';
 import { Download, FileText } from 'lucide-react';
 
 interface UnsupportedFileViewerProps {
-  fileUrl: string;
+  storagePath: string;
   fileName?: string;
   fileType?: string;
 }
 
-export function UnsupportedFileViewer({ fileUrl, fileName, fileType }: UnsupportedFileViewerProps) {
+export function UnsupportedFileViewer({
+  storagePath,
+  fileName,
+  fileType,
+}: UnsupportedFileViewerProps) {
   const downloadFile = () => {
     const link = document.createElement('a');
-    link.href = fileUrl;
+    link.href = storagePath;
     link.download = fileName || 'document';
     document.body.appendChild(link);
     link.click();

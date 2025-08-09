@@ -85,9 +85,9 @@ export class UploadQueue {
 
       if (folderName) {
         formData.append('folderName', folderName);
-      }
-      if (folderId) {
-        formData.append('folderId', folderId);
+        if (folderId) {
+          formData.append('folderId', folderId);
+        }
       }
 
       const response = await axiosClient.post('/api/v1/documents/create', formData, {

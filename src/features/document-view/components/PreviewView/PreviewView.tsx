@@ -13,29 +13,35 @@ import { EmptyStateViewer } from '../EmptyStateViewer/EmptyStateViewer';
 import { FileTypeDetector } from '../../utils/fileTypeDetector';
 
 interface PreviewViewProps {
-  fileUrl?: string;
+  storagePath?: string;
   fileName?: string;
   fileType?: string;
 }
 
-export function PreviewView({ fileUrl, fileName, fileType }: PreviewViewProps) {
+export function PreviewView({ storagePath, fileName, fileType }: PreviewViewProps) {
   // Handle different file types using the modular components
   const renderContent = () => {
-    if (!fileUrl) {
+    if (!storagePath) {
       return <EmptyStateViewer />;
     }
 
-    const fileTypeInfo = FileTypeDetector.detectFileType(fileUrl, fileType);
+    const fileTypeInfo = FileTypeDetector.detectFileType(storagePath, fileType);
 
     switch (fileTypeInfo.category) {
       case 'pdf':
-        return <PDFViewer fileUrl={fileUrl} fileName={fileName} />;
+        return <PDFViewer storagePath={storagePath} fileName={fileName} />;
 
       case 'image':
-        return <ImageViewer fileUrl={fileUrl} fileName={fileName} />;
+        return <ImageViewer storagePath={storagePath} fileName={fileName} />;
 
       default:
-        return <UnsupportedFileViewer fileUrl={fileUrl} fileName={fileName} fileType={fileType} />;
+        return (
+          <UnsupportedFileViewer
+            storagePath={storagePath}
+            fileName={fileName}
+            fileType={fileType}
+          />
+        );
     }
   };
 

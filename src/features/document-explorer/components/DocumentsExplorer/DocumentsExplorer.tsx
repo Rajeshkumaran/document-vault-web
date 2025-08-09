@@ -129,9 +129,6 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
         accessorFn: (row) => row.file_type,
         cell: ({ getValue }) => {
           const fileType = getValue() as string;
-          console.log('Debugger dates', {
-            fileType,
-          });
           return <span className='text-gray-500 text-sm capitalize'>{fileType}</span>;
         },
       },
@@ -141,10 +138,6 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
         accessorKey: 'created_at',
         cell: ({ getValue }) => {
           const createdAt = getValue() as string;
-          console.log('Debugger dates', {
-            createdAt,
-            format: parseISOWithMicros(createdAt),
-          });
           return <span className='text-gray-500 text-sm'>{parseISOWithMicros(createdAt)}</span>;
         },
       },

@@ -7,8 +7,8 @@ export interface FileTypeInfo {
 }
 
 export class FileTypeDetector {
-  static detectFileType(fileUrl?: string, fileType?: string): FileTypeInfo {
-    if (!fileUrl && !fileType) {
+  static detectFileType(storagePath?: string, fileType?: string): FileTypeInfo {
+    if (!storagePath && !fileType) {
       return { category: 'unsupported' };
     }
 
@@ -24,8 +24,8 @@ export class FileTypeDetector {
     }
 
     // Fall back to URL-based detection
-    if (fileUrl) {
-      const url = fileUrl.toLowerCase();
+    if (storagePath) {
+      const url = storagePath.toLowerCase();
 
       if (url.includes('.pdf')) {
         return { category: 'pdf', mimeType: 'application/pdf', extension: 'pdf' };
@@ -47,9 +47,9 @@ export class FileTypeDetector {
     return imageTypes.includes(fileType.toLowerCase()) || fileType.startsWith('image/');
   }
 
-  static isPDFType(fileType?: string, fileUrl?: string): boolean {
+  static isPDFType(fileType?: string, storagePath?: string): boolean {
     if (fileType === 'pdf' || fileType?.includes('pdf')) return true;
-    if (fileUrl?.toLowerCase().includes('.pdf')) return true;
+    if (storagePath?.toLowerCase().includes('.pdf')) return true;
     return false;
   }
 

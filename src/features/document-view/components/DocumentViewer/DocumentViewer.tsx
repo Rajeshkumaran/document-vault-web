@@ -5,12 +5,17 @@ import { PreviewView } from '../PreviewView/PreviewView';
 
 interface DocumentViewerProps {
   documentId: string;
-  fileUrl?: string;
+  storagePath?: string;
   fileName?: string;
   fileType?: string;
 }
 
-export function DocumentViewer({ documentId, fileUrl, fileName, fileType }: DocumentViewerProps) {
+export function DocumentViewer({
+  documentId,
+  storagePath,
+  fileName,
+  fileType,
+}: DocumentViewerProps) {
   const [tab, setTab] = React.useState<'summary' | 'preview'>('preview');
 
   return (
@@ -30,12 +35,10 @@ export function DocumentViewer({ documentId, fileUrl, fileName, fileType }: Docu
         </TabsList>
         <div className='p-5 flex-1 min-h-0'>
           <TabsContent value='preview' className='h-full'>
-            {tab === 'preview' && (
-              <PreviewView fileUrl={fileUrl} fileName={fileName} fileType={fileType} />
-            )}
+            <PreviewView storagePath={storagePath} fileName={fileName} fileType={fileType} />
           </TabsContent>
           <TabsContent value='summary' className='h-full'>
-            {tab === 'summary' && <SummaryView />}
+            <SummaryView documentId={documentId} />
           </TabsContent>
         </div>
       </Tabs>

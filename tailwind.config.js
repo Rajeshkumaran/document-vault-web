@@ -1,7 +1,10 @@
 /**** Tailwind config adapted for shadcn-style component patterns (Tailwind v4) ****/
+import typography from '@tailwindcss/typography';
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+const config = {
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
+  plugins: [typography],
   theme: {
     extend: {
       colors: {
@@ -62,3 +65,5 @@ module.exports = {
   },
   darkMode: ['class'],
 };
+
+export default config;

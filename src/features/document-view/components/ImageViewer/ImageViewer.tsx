@@ -3,17 +3,17 @@ import { Download } from 'lucide-react';
 import Image from 'next/image';
 
 interface ImageViewerProps {
-  fileUrl: string;
+  storagePath: string;
   fileName?: string;
 }
 
-export function ImageViewer({ fileUrl, fileName }: ImageViewerProps) {
+export function ImageViewer({ storagePath, fileName }: ImageViewerProps) {
   const [error, setError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
   const downloadFile = () => {
     const link = document.createElement('a');
-    link.href = fileUrl;
+    link.href = storagePath;
     link.download = fileName || 'image';
     document.body.appendChild(link);
     link.click();
@@ -62,7 +62,7 @@ export function ImageViewer({ fileUrl, fileName }: ImageViewerProps) {
                 </div>
               )}
               <Image
-                src={fileUrl}
+                src={storagePath}
                 alt={fileName || 'Image preview'}
                 width={800}
                 height={600}

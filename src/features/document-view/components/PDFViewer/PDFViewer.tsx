@@ -3,11 +3,11 @@ import { Document, Page } from 'react-pdf';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Loader2 } from 'lucide-react';
 
 interface PDFViewerProps {
-  fileUrl: string;
+  storagePath: string;
   fileName?: string;
 }
 
-export function PDFViewer({ fileUrl, fileName }: PDFViewerProps) {
+export function PDFViewer({ storagePath, fileName }: PDFViewerProps) {
   const [numPages, setNumPages] = React.useState<number>(0);
   const [pageNumber, setPageNumber] = React.useState<number>(0);
   const [scale, setScale] = React.useState<number>(1.0);
@@ -47,7 +47,7 @@ export function PDFViewer({ fileUrl, fileName }: PDFViewerProps) {
 
   const downloadFile = () => {
     const link = document.createElement('a');
-    link.href = fileUrl;
+    link.href = storagePath;
     link.download = fileName || 'document.pdf';
     document.body.appendChild(link);
     link.click();
@@ -57,7 +57,7 @@ export function PDFViewer({ fileUrl, fileName }: PDFViewerProps) {
   React.useEffect(() => {
     setIsLoading(true);
     setError(null);
-  }, [fileUrl]);
+  }, [storagePath]);
 
   // Effect to handle container width changes
   React.useEffect(() => {
@@ -129,7 +129,7 @@ export function PDFViewer({ fileUrl, fileName }: PDFViewerProps) {
 
           {!error && (
             <Document
-              file={fileUrl}
+              file={storagePath}
               onLoadSuccess={onDocumentLoadSuccess}
               onLoadError={onDocumentLoadError}
               loading={
