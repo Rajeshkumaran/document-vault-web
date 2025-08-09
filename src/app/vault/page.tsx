@@ -22,6 +22,7 @@ export default function VaultPage() {
         {showDocumentViewer && selectedFile && (
           <div className='flex-1 min-h-0 overflow-auto'>
             <DocumentViewer
+              key={selectedFile.id}
               documentId={selectedFile.id}
               storagePath={selectedFile.storage_path} // Assuming FileNode has a storage_path property
               fileName={selectedFile.name}

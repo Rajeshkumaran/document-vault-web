@@ -30,6 +30,21 @@ export function MarkdownRenderer({ markdown }: MarkdownRendererProps) {
               </code>
             );
           },
+          // Custom styling for links
+          a: ({ href, children, ...props }) => {
+            console.log('Link clicked:', href);
+            return (
+              <a
+                href={href}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-orange-400 hover:text-orange-600/80 underline underline-offset-4'
+                {...props}
+              >
+                {children}
+              </a>
+            );
+          },
         }}
       >
         {markdown}

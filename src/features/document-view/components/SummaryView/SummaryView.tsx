@@ -3,8 +3,15 @@ import { Loader2 } from 'lucide-react';
 import { useGetDocumentSummary } from '../../hooks/useGetDocumentSummary';
 import { MarkdownRenderer } from '../MarkdownRenderer/MarkdownRenderer';
 
-export function SummaryView({ documentId }: { documentId: string }) {
+const SummaryViewComponent = ({ documentId }: { documentId: string }) => {
   const { summary, loading, error } = useGetDocumentSummary({ documentId });
+
+  React.useEffect(() => {
+    console.log('Debugger SummaryView mounted');
+    return () => {
+      console.log('Debugger SummaryView unmounted');
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -76,4 +83,8 @@ export function SummaryView({ documentId }: { documentId: string }) {
       </section>
     </div>
   );
-}
+};
+
+SummaryViewComponent.displayName = 'SummaryView';
+
+export const SummaryView = React.memo(SummaryViewComponent);

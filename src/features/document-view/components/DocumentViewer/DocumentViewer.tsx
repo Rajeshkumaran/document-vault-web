@@ -22,7 +22,6 @@ export function DocumentViewer({
     <div className='flex flex-col border border-gray-200 rounded-lg bg-white shadow-sm h-full'>
       <header className='px-5 py-3 border-b border-gray-200 flex items-center justify-between'>
         <h2 className='text-sm font-semibold tracking-wide text-gray-700'>Document Viewer</h2>
-        <div className='text-xs text-gray-400'>ID: {documentId}</div>
       </header>
       <Tabs
         value={tab}
