@@ -71,7 +71,7 @@ export function DocumentViewer({
         <TabsList className='mt-2'>
           <TabsTrigger value='preview'>Preview</TabsTrigger>
           <TabsTrigger value='summary'>Summary</TabsTrigger>
-          <TabsTrigger value='markdown'>Markdown</TabsTrigger>
+          {/* <TabsTrigger value='markdown'>Markdown</TabsTrigger> */}
           {insights && (
             <TabsTrigger value='insights'>
               <div className='flex'>

@@ -1,9 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getDocumentSummary } from '@/data/api';
-import { mockSummary } from '../utils/mockSummary';
 
 export function useGetDocumentSummary({ documentId }: { documentId: string }) {
-  const [summary, setSummary] = useState<string>(mockSummary);
+  const [summary, setSummary] = useState<string>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,5 +25,5 @@ export function useGetDocumentSummary({ documentId }: { documentId: string }) {
     getSummary();
   }, [getSummary]);
 
-  return { summary, loading, error };
+  return { summary, loading, error, fetch: getSummary };
 }

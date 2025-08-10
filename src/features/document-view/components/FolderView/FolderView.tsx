@@ -103,7 +103,7 @@ const FolderItem: React.FC<{
 };
 
 export const FolderView: React.FC<FolderViewProps> = ({
-  folderName = 'My Files',
+  folderName,
   items,
   onFolderClick,
   onFileClick,

@@ -8,20 +8,18 @@ import { FileNode, FolderNode } from '@/features/document-explorer/interfaces';
 import { useFolderNavigation } from '@/features/document-view/hooks';
 import { useUploadQueue } from '@/features/document-explorer/hooks/useUploadQueue';
 import { useDocumentData } from '@/features/document-explorer/hooks/useDocumentData';
-import { useToastHelpers } from '@/components/ui';
+import { useToastHelpers } from '@/components/atoms/Toast';
 
 export default function VaultPage() {
   const { showSuccess } = useToastHelpers();
 
   const [showDocumentViewer, toggleDocumentViewer] = useState(false);
   const [selectedFile, setSelectedFile] = useState<FileNode | null>(null);
-  const {
-    documents,
-    loading: areDocumentsLoading,
-    loaded: areDocumentsLoaded,
-    refetch: refetchDocuments,
-  } = useDocumentData();
-
+  const { documents, loaded: areDocumentsLoaded, refetch: refetchDocuments } = useDocumentData();
+  console.log('Debugger ----', {
+    selectedFile,
+    showDocumentViewer,
+  });
   // Use the folder navigation hook
   const {
     loadingFolderView,
@@ -84,7 +82,6 @@ export default function VaultPage() {
         <div className='flex-1 min-h-0 overflow-auto'>
           <DocumentsExplorer
             documents={documents}
-            areDocumentsLoading={areDocumentsLoading}
             onFileClick={handleFileClick}
             onFolderClick={handleExplorerFolderClick}
           />
@@ -107,7 +104,6 @@ export default function VaultPage() {
         {showDocumentViewer && selectedFile && (
           <div className='flex-3 min-h-0 overflow-auto'>
             <DocumentViewer
-              key={selectedFile.id}
               documentId={selectedFile.id}
               storagePath={selectedFile.storage_path}
               fileName={selectedFile.name}

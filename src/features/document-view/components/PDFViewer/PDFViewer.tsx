@@ -11,7 +11,7 @@ export function PDFViewer({ storagePath, fileName }: PDFViewerProps) {
   const [numPages, setNumPages] = React.useState<number>(0);
   const [pageNumber, setPageNumber] = React.useState<number>(0);
   const [scale, setScale] = React.useState<number>(1.0);
-  const [_isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [, setIsLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
   const [containerWidth, setContainerWidth] = React.useState<number>(0);
   const containerRef = React.useRef<HTMLDivElement>(null);

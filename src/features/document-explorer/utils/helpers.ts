@@ -4,7 +4,7 @@ export function flatten(nodes: DocumentNode[]): DocumentNode[] {
   return nodes.map((n) => ({ ...n }));
 }
 
-export function mapExtensionToType(name: string): FileNode['fileType'] {
+export function mapExtensionToType(name: string): FileNode['file_type'] {
   const ext = name.split('.').pop()?.toLowerCase();
   switch (ext) {
     case 'pdf':
@@ -15,7 +15,7 @@ export function mapExtensionToType(name: string): FileNode['fileType'] {
   }
 }
 
-function formatDate(dateString) {
+function formatDate(dateString: Date) {
   const date = new Date(dateString);
   const day = String(date.getDate()).padStart(2, '0');
   const month = date.toLocaleString('en-US', { month: 'short' });

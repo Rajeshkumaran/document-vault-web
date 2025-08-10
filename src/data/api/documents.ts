@@ -1,4 +1,4 @@
-import { Document } from '@/lib/types';
+import { Document, DocumentInsights } from '@/lib/types';
 import { axiosClient } from '@/lib/axiosClient';
 
 // Document API interfaces
@@ -56,7 +56,9 @@ export async function getDocumentSummary(id: string): Promise<{ summary: string 
 }
 
 // Get document Insights function
-export async function getDocumentInsights(id: string): Promise<{ insights: string }> {
-  const response = await axiosClient.get<{ insights: string }>(`/api/v1/documents/${id}/insights`);
+export async function getDocumentInsights(id: string): Promise<{ insights: DocumentInsights }> {
+  const response = await axiosClient.get<{ insights: DocumentInsights }>(
+    `/api/v1/documents/${id}/insights`,
+  );
   return response.data;
 }

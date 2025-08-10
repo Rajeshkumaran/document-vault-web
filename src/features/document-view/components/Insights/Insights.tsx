@@ -30,9 +30,9 @@ interface InsightsProps {
 const Insights: React.FC<InsightsProps> = ({ insights }) => {
   if (!insights) {
     return (
-      <div className='p-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-200 dark:border-gray-700'>
-        <div className='text-center text-muted-foreground'>
-          <div className='w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 flex items-center justify-center'>
+      <div className='p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-200/50'>
+        <div className='text-center'>
+          <div className='w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center'>
             <svg
               className='w-8 h-8 text-blue-500'
               fill='none'
@@ -47,8 +47,8 @@ const Insights: React.FC<InsightsProps> = ({ insights }) => {
               />
             </svg>
           </div>
-          <p className='text-sm font-medium mb-1'>No insights available</p>
-          <p className='text-xs text-muted-foreground'>Generate insights to see analysis here</p>
+          <p className='text-sm font-medium mb-1 text-gray-900'>No insights available</p>
+          <p className='text-xs text-gray-500'>Generate insights to see analysis here</p>
         </div>
       </div>
     );
@@ -60,7 +60,7 @@ const Insights: React.FC<InsightsProps> = ({ insights }) => {
   return (
     <div className='space-y-6 max-h-[550px] overflow-y-auto pr-2'>
       {/* Header Card */}
-      <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-5'>
+      <div className='bg-white rounded-xl shadow-sm border border-gray-200/50 p-5'>
         <div className='flex items-center justify-between mb-2'>
           <div className='flex items-center space-x-3'>
             <div className='w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center'>
@@ -78,12 +78,12 @@ const Insights: React.FC<InsightsProps> = ({ insights }) => {
                 />
               </svg>
             </div>
-            <span className='text-sm font-medium text-gray-600 dark:text-gray-300 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 px-3 py-1.5 rounded-full'>
+            <span className='text-sm font-medium text-gray-600 bg-gradient-to-r from-purple-100 to-blue-100 px-3 py-1.5 rounded-full'>
               AI Generated Insights
             </span>
           </div>
           <div className='flex items-center space-x-2'>
-            <div className='flex items-center space-x-2 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 rounded-full'>
+            <div className='flex items-center space-x-2 bg-gray-50 px-3 py-1.5 rounded-full'>
               <div
                 className={`w-2.5 h-2.5 rounded-full ${
                   confidence_score >= 0.8
@@ -93,21 +93,20 @@ const Insights: React.FC<InsightsProps> = ({ insights }) => {
                     : 'bg-red-500 shadow-sm shadow-red-500/30'
                 }`}
               />
-              <span className='text-sm font-semibold text-gray-700 dark:text-gray-200'>
+              <span className='text-sm font-semibold text-gray-700'>
                 {confidencePercentage}% confidence
               </span>
             </div>
           </div>
         </div>
-        <p className='text-xs text-gray-500 dark:text-gray-400 mt-2'>
-          Document Type:{' '}
-          <span className='font-medium text-gray-700 dark:text-gray-300'>{document_type}</span>
+        <p className='text-xs text-gray-500 mt-2'>
+          Document Type: <span className='font-medium text-gray-700'>{document_type}</span>
         </p>
       </div>
 
       {/* Financial Data */}
       {key_insights.financial_data.amounts.length > 0 && (
-        <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-700 p-6'>
+        <div className='bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200/50 p-6'>
           <div className='flex items-center mb-4'>
             <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center mr-3'>
               <svg
@@ -125,25 +124,19 @@ const Insights: React.FC<InsightsProps> = ({ insights }) => {
               </svg>
             </div>
             <div>
-              <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
-                Financial Information
-              </h3>
-              <p className='text-sm text-gray-500 dark:text-gray-400'>
-                Monetary values extracted from document
-              </p>
+              <h3 className='text-lg font-semibold text-gray-900'>Financial Information</h3>
+              <p className='text-sm text-gray-500'>Monetary values extracted from document</p>
             </div>
           </div>
           <div className='grid gap-3'>
             {key_insights.financial_data.amounts.map((amount, index) => (
               <div
                 key={index}
-                className='flex justify-between items-center py-3 px-4 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-700/50 dark:to-gray-700/30 rounded-lg border border-gray-100 dark:border-gray-600 hover:shadow-sm transition-shadow'
+                className='flex justify-between items-center py-3 px-4 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-lg border border-gray-100 hover:shadow-sm transition-shadow'
               >
-                <span className='text-sm font-medium text-gray-700 dark:text-gray-200'>
-                  {amount.label}
-                </span>
+                <span className='text-sm font-medium text-gray-700'>{amount.label}</span>
                 <div className='flex items-center space-x-2'>
-                  <span className='text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 rounded-full'>
+                  <span className='text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full'>
                     {amount.currency} {amount.value.toLocaleString()}
                   </span>
                 </div>
@@ -155,7 +148,7 @@ const Insights: React.FC<InsightsProps> = ({ insights }) => {
 
       {/* Coverage Details */}
       {key_insights.coverage_details.length > 0 && (
-        <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-700 p-6'>
+        <div className='bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200/50 p-6'>
           <div className='flex items-center mb-4'>
             <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3'>
               <svg
@@ -173,24 +166,18 @@ const Insights: React.FC<InsightsProps> = ({ insights }) => {
               </svg>
             </div>
             <div>
-              <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
-                Coverage Details
-              </h3>
-              <p className='text-sm text-gray-500 dark:text-gray-400'>
-                Protection and coverage information
-              </p>
+              <h3 className='text-lg font-semibold text-gray-900'>Coverage Details</h3>
+              <p className='text-sm text-gray-500'>Protection and coverage information</p>
             </div>
           </div>
           <div className='space-y-3'>
             {key_insights.coverage_details.map((detail, index) => (
               <div
                 key={index}
-                className='flex items-start space-x-3 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30'
+                className='flex items-start space-x-3 p-3 rounded-lg bg-blue-50/50 border border-blue-100'
               >
                 <div className='w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0' />
-                <span className='text-sm text-gray-700 dark:text-gray-200 leading-relaxed'>
-                  {detail}
-                </span>
+                <span className='text-sm text-gray-700 leading-relaxed'>{detail}</span>
               </div>
             ))}
           </div>
@@ -199,7 +186,7 @@ const Insights: React.FC<InsightsProps> = ({ insights }) => {
 
       {/* Critical Information */}
       {key_insights.critical_information.length > 0 && (
-        <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-700 p-6'>
+        <div className='bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200/50 p-6'>
           <div className='flex items-center mb-4'>
             <div className='w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mr-3'>
               <svg
@@ -217,26 +204,20 @@ const Insights: React.FC<InsightsProps> = ({ insights }) => {
               </svg>
             </div>
             <div>
-              <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>
-                Critical Information
-              </h3>
-              <p className='text-sm text-gray-500 dark:text-gray-400'>
-                Important details requiring attention
-              </p>
+              <h3 className='text-lg font-semibold text-gray-900'>Critical Information</h3>
+              <p className='text-sm text-gray-500'>Important details requiring attention</p>
             </div>
           </div>
           <div className='space-y-3'>
             {key_insights.critical_information.map((info, index) => (
               <div
                 key={index}
-                className='relative p-4 rounded-lg bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30'
+                className='relative p-4 rounded-lg bg-amber-50/50 border border-amber-200'
               >
                 <div className='absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-l-lg' />
                 <div className='flex items-start space-x-3'>
                   <div className='w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0' />
-                  <span className='text-sm text-gray-700 dark:text-gray-200 leading-relaxed block'>
-                    {info}
-                  </span>
+                  <span className='text-sm text-gray-700 leading-relaxed block'>{info}</span>
                 </div>
               </div>
             ))}
@@ -245,7 +226,7 @@ const Insights: React.FC<InsightsProps> = ({ insights }) => {
       )}
 
       {/* Footer */}
-      <div className='bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4'>
+      <div className='bg-white rounded-xl shadow-sm border border-gray-200/50 p-4'>
         <div className='text-center'>
           <div className='flex items-center justify-center space-x-2 mb-2'>
             <div className='w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse' />
@@ -258,14 +239,11 @@ const Insights: React.FC<InsightsProps> = ({ insights }) => {
               style={{ animationDelay: '0.4s' }}
             />
           </div>
-          <p className='text-xs text-gray-500 dark:text-gray-400 leading-relaxed'>
+          <p className='text-xs text-gray-500 leading-relaxed'>
             Analysis generated with{' '}
-            <span className='font-semibold text-gray-700 dark:text-gray-300'>
-              {confidencePercentage}%
-            </span>{' '}
-            confidence
+            <span className='font-semibold text-gray-700'>{confidencePercentage}%</span> confidence
             <br />
-            <span className='text-gray-400 dark:text-gray-500'>
+            <span className='text-gray-400'>
               Data extracted from document structure and content
             </span>
           </p>
