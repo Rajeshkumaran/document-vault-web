@@ -13,6 +13,7 @@ import {
 import type { FolderItem, FolderViewProps } from '../../interfaces/common';
 import { UploadDropZone } from '@/features/document-explorer/components/UploadDropZone/UploadDropZone';
 import { UploadProgressIndicator } from '@/features/document-explorer/components/UploadProgressIndicator/UploadProgressIndicator';
+import { FolderViewLoadingShimmer } from './FolderViewShimmers';
 
 const getFileIcon = (fileType?: string) => {
   if (!fileType) return <File className='w-8 h-8' />;
@@ -118,14 +119,7 @@ export const FolderView: React.FC<FolderViewProps> = ({
   const files = items.filter((item) => item.type === 'file');
 
   if (loading) {
-    return (
-      <div className='flex items-center justify-center h-64'>
-        <div className='flex flex-col items-center space-y-3'>
-          <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500'></div>
-          <p className='text-sm text-gray-500'>Loading folder contents...</p>
-        </div>
-      </div>
-    );
+    return <FolderViewLoadingShimmer />;
   }
 
   return (

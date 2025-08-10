@@ -14,6 +14,9 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const folderInputRef = React.useRef<HTMLInputElement | null>(null);
 
+  const [showFileInputElement, setShowFileInputElement] = React.useState(true);
+  const [showFolderInputElement, setShowFolderInputElement] = React.useState(true);
+
   const { dragActive, error, handleFiles, handleDragOver, handleDragLeave, handleDrop } =
     useDragAndDrop({
       allowFileTypes,
@@ -39,8 +42,6 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
         folderName = pathParts[0];
       }
     }
-
-    console.log('Extracted folder name:', folderName);
 
     handleFiles(files, folderName);
     e.target.value = '';
@@ -105,6 +106,12 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
               e.stopPropagation();
               openFileDialog();
             }}
+            onMouseEnter={() => {
+              setShowFolderInputElement(false);
+            }}
+            onMouseLeave={() => {
+              setShowFolderInputElement(true);
+            }}
             className='px-3 py-1 text-xs rounded-full border bg-orange-100 border-orange-300 text-orange-700 hover:bg-orange-200 transition-colors'
           >
             Choose Files
@@ -115,6 +122,12 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
               e.stopPropagation();
               openFolderDialog();
             }}
+            onMouseEnter={() => {
+              setShowFileInputElement(false);
+            }}
+            onMouseLeave={() => {
+              setShowFileInputElement(true);
+            }}
             className='px-3 py-1 text-xs rounded-full border bg-blue-100 border-blue-300 text-blue-700 hover:bg-blue-200 transition-colors'
           >
             Choose Folders
@@ -122,29 +135,32 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
         </div>
 
         {/* File input for regular files */}
-        <input
-          ref={fileInputRef}
-          type='file'
-          multiple
-          accept={allowFileTypes.join(',')}
-          onChange={handleFileInputChange}
-          className='hidden'
-        />
-
-        <input
-          ref={(el) => {
-            folderInputRef.current = el;
-            if (el) {
-              // Ensure the webkitdirectory attribute is set immediately
-              el.setAttribute('webkitdirectory', 'true');
-              el.setAttribute('directory', 'true'); // Additional attribute for broader support
-              el.setAttribute('multiple', 'true');
-            }
-          }}
-          type='file'
-          onChange={handleFolderInputChange}
-          className='hidden'
-        />
+        {showFileInputElement && (
+          <input
+            ref={fileInputRef}
+            type='file'
+            multiple
+            accept={allowFileTypes.join(',')}
+            onChange={handleFileInputChange}
+            className='hidden'
+          />
+        )}
+        {showFolderInputElement && (
+          <input
+            ref={(el) => {
+              folderInputRef.current = el;
+              if (el) {
+                // Ensure the webkitdirectory attribute is set immediately
+                el.setAttribute('webkitdirectory', 'true');
+                el.setAttribute('directory', 'true'); // Additional attribute for broader support
+                el.setAttribute('multiple', 'true');
+              }
+            }}
+            type='file'
+            onChange={handleFolderInputChange}
+            className='hidden'
+          />
+        )}
       </div>
       {error && (
         <p
