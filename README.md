@@ -180,8 +180,6 @@ The API client is configured in `src/lib/axiosClient.ts` with proper error handl
 
 - **Tailwind CSS 4**: Latest version with improved performance and features
 - **Consistent Theming**: Unified color palette and spacing system
-- **Responsive Design**: Mobile-first approach with breakpoint consistency
-- **Accessibility**: ARIA compliant components and keyboard navigation
 - **Icon System**: Lucide React icons for consistent visual language
 
 ## 🚀 Deployment
