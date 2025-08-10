@@ -12,8 +12,10 @@ export interface UploadProgress {
 export interface UploadQueueItem {
   id: string;
   file: File;
-  folderName?: string;
-  folderId?: string;
+  metaData: {
+    newFolderName?: string;
+    currentFolderId?: string;
+  };
 }
 
 export class UploadQueue {
@@ -35,12 +37,17 @@ export class UploadQueue {
     this.onAllUploadsComplete = onAllUploadsComplete;
   }
 
-  addFiles(files: File[], folderName?: string, folderId?: string): string[] {
+  addFiles(
+    files: File[],
+    metaData: {
+      currentFolderId?: string;
+    },
+  ): string[] {
     const ids: string[] = [];
 
     files.forEach((file) => {
       const id = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const queueItem: UploadQueueItem = { id, file, folderName, folderId };
+      const queueItem: UploadQueueItem = { id, file, metaData };
 
       this.queue.push(queueItem);
       this.progressMap.set(id, {
@@ -72,23 +79,22 @@ export class UploadQueue {
   }
 
   private async uploadFile(item: UploadQueueItem): Promise<void> {
-    const { id, file, folderName, folderId } = item;
+    const { id, file, metaData } = item;
     const abortController = new AbortController();
     this.activeUploads.set(id, abortController);
 
     try {
       // Update status to uploading
       this.updateProgress(id, { status: 'uploading', progress: 0 });
-
+      const { currentFolderId } = metaData;
       const formData = new FormData();
       formData.append('file', file);
+      let formMetaData = {};
 
-      if (folderName) {
-        formData.append('folderName', folderName);
-        if (folderId) {
-          formData.append('folderId', folderId);
-        }
-      }
+      const folderId = currentFolderId || null;
+      formMetaData = { ...formMetaData, current_folder_id: folderId };
+
+      formData.append('meta_data', JSON.stringify(formMetaData));
 
       const response = await axiosClient.post('/api/v1/documents/create', formData, {
         headers: {

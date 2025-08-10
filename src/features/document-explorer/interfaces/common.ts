@@ -8,7 +8,7 @@ export interface FileType {
 export interface BaseNode {
   id: string;
   name: string;
-  createdAt: string; // ISO date
+  createdAt?: string; // ISO date
 }
 
 export interface FileNode extends BaseNode {

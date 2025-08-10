@@ -5,39 +5,41 @@ import { useDragAndDrop } from '../../hooks/useDragAndDrop';
 interface UploadDropZoneProps {
   allowFileTypes: string[];
   onUploadFiles: (files: File[], folderName?: string) => void; // Updated to accept folder name
-  allowFolders?: boolean; // New prop to control folder upload
 }
 
 export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
   allowFileTypes,
   onUploadFiles,
-  allowFolders = false,
 }) => {
-  const [uploadMode, setUploadMode] = React.useState<'files' | 'folders'>('files');
-  const [customFolderName, setCustomFolderName] = React.useState<string>('');
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const folderInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const { dragActive, error, handleFiles, handleDragOver, handleDragLeave, handleDrop } =
     useDragAndDrop({
       allowFileTypes,
       onUploadFiles: (files, folderName) => {
         onUploadFiles(files, folderName);
-        setCustomFolderName('');
       },
     });
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    handleFiles(files, customFolderName);
+    handleFiles(files);
     e.target.value = '';
-    setCustomFolderName('');
   };
 
-  const handleDropWithCustomFolder = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const files = Array.from(e.dataTransfer.files ?? []);
-    handleFiles(files, customFolderName);
+  const handleFolderInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    handleFiles(files);
+    e.target.value = '';
+  };
+
+  const openFileDialog = () => {
+    fileInputRef.current?.click();
+  };
+
+  const openFolderDialog = () => {
+    folderInputRef.current?.click();
   };
 
   return (
@@ -53,92 +55,68 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
         onDragEnter={handleDragOver}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        onDrop={customFolderName ? handleDropWithCustomFolder : handleDrop}
-        onClick={() => fileInputRef.current?.click()}
+        onDrop={handleDrop}
+        onClick={() => openFileDialog()}
         role='button'
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            fileInputRef.current?.click();
+            openFileDialog();
           }
         }}
-        aria-label='Upload files'
+        aria-label='Upload files or folders'
         aria-describedby={error ? 'upload-error' : undefined}
       >
         <Upload className='h-6 w-6 text-orange-600' />
-        <div className='text-gray-700 font-medium'>
-          Drag & drop {uploadMode === 'folders' ? 'folders' : 'files'} here
-        </div>
+        <div className='text-gray-700 font-medium'>Drag & drop files or folders here</div>
         <div className='text-gray-500 text-xs'>
           or click to browse ({allowFileTypes.join(', ')})
         </div>
 
-        {allowFolders && (
-          <div className='flex gap-2 mt-2'>
-            <button
-              type='button'
-              onClick={(e) => {
-                e.stopPropagation();
-                setUploadMode('files');
-              }}
-              className={`px-3 py-1 text-xs rounded-full border transition-colors ${
-                uploadMode === 'files'
-                  ? 'bg-orange-100 border-orange-300 text-orange-700'
-                  : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Files
-            </button>
-            <button
-              type='button'
-              onClick={(e) => {
-                e.stopPropagation();
-                setUploadMode('folders');
-              }}
-              className={`px-3 py-1 text-xs rounded-full border transition-colors ${
-                uploadMode === 'folders'
-                  ? 'bg-orange-100 border-orange-300 text-orange-700'
-                  : 'bg-gray-100 border-gray-300 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Folders
-            </button>
-          </div>
-        )}
+        <div className='flex gap-2 mt-2'>
+          <button
+            type='button'
+            onClick={(e) => {
+              e.stopPropagation();
+              openFileDialog();
+            }}
+            className='px-3 py-1 text-xs rounded-full border bg-orange-100 border-orange-300 text-orange-700 hover:bg-orange-200 transition-colors'
+          >
+            Choose Files
+          </button>
+          <button
+            type='button'
+            onClick={(e) => {
+              e.stopPropagation();
+              openFolderDialog();
+            }}
+            className='px-3 py-1 text-xs rounded-full border bg-blue-100 border-blue-300 text-blue-700 hover:bg-blue-200 transition-colors'
+          >
+            Choose Folders
+          </button>
+        </div>
 
-        {/* Custom folder name input */}
-        {uploadMode === 'files' && (
-          <div className='mt-2 w-full max-w-xs'>
-            <input
-              type='text'
-              placeholder='Optional folder name'
-              value={customFolderName}
-              onChange={(e) => {
-                e.stopPropagation();
-                setCustomFolderName(e.target.value);
-              }}
-              onClick={(e) => e.stopPropagation()}
-              className='w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-200'
-            />
-          </div>
-        )}
-
+        {/* File input for regular files */}
         <input
-          ref={(el) => {
-            fileInputRef.current = el;
-            if (el) {
-              if (uploadMode === 'folders') {
-                el.setAttribute('webkitdirectory', 'true');
-              } else {
-                el.removeAttribute('webkitdirectory');
-              }
-            }
-          }}
+          ref={fileInputRef}
           type='file'
           multiple
           accept={allowFileTypes.join(',')}
           onChange={handleFileInputChange}
+          className='hidden'
+        />
+
+        <input
+          ref={(el) => {
+            folderInputRef.current = el;
+            if (el) {
+              el.setAttribute('webkitdirectory', 'true');
+            }
+          }}
+          type='file'
+          multiple
+          onChange={handleFolderInputChange}
           className='hidden'
         />
       </div>

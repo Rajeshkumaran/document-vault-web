@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { generateUUID } from '@/lib/utils';
 import { UploadQueue, UploadProgress } from '../services/uploadQueue';
 
 export const useUploadQueue = (maxConcurrentUploads = 3, onAllUploadsComplete?: () => void) => {
@@ -35,11 +34,18 @@ export const useUploadQueue = (maxConcurrentUploads = 3, onAllUploadsComplete?: 
     };
   }, [maxConcurrentUploads]); // Remove onAllUploadsComplete from dependencies
 
-  const addFiles = useCallback((files: File[], folderName?: string): string[] => {
-    if (!queueRef.current) return [];
-    const folderId = generateUUID();
-    return queueRef.current.addFiles(files, folderName, folderId);
-  }, []);
+  const addFiles = useCallback(
+    (
+      files: File[],
+      metaData: {
+        currentFolderId?: string;
+      },
+    ): string[] => {
+      if (!queueRef.current) return [];
+      return queueRef.current.addFiles(files, metaData);
+    },
+    [],
+  );
 
   const clearCompleted = useCallback(() => {
     if (queueRef.current) {

@@ -1,197 +1,111 @@
 import * as React from 'react';
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getExpandedRowModel,
-  useReactTable,
-  ExpandedState,
-} from '@tanstack/react-table';
-import { useDocumentData } from '../../hooks/useDocumentData';
-import { DocumentNode, FileNode } from '../../interfaces/common';
-import { Folder, FileText, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
-import { UploadDropZone } from '../UploadDropZone/UploadDropZone';
-import { UploadProgressIndicator } from '../UploadProgressIndicator/UploadProgressIndicator';
-import { useUploadQueue } from '../../hooks/useUploadQueue';
-import { ALLOWED_FILE_TYPES } from '@/lib/constants';
-import { parseISOWithMicros } from '../../utils/helpers';
+import { DocumentNode, FileNode, FolderNode } from '../../interfaces/common';
+import { Folder, Loader2 } from 'lucide-react';
+import { TreeNode } from '../TreeNode';
 
-export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNode) => void }) {
-  const { documents, loading, refetch } = useDocumentData();
+export function DocumentsExplorer({
+  documents,
+  areDocumentsLoading,
+  onFileClick,
+  onFolderClick,
+}: {
+  documents: DocumentNode[];
+  areDocumentsLoading: boolean;
+  onFileClick?: (file: FileNode) => void;
+  onFolderClick?: (folder: FolderNode) => void;
+}) {
+  const [expanded, setExpanded] = React.useState<Set<string>>(new Set(['all-files-root']));
+  const [selectedFile, setSelectedFile] = React.useState<FileNode | null>(null);
+  const [currentFolder, setCurrentFolder] = React.useState<FolderNode | null>(null);
 
-  // Callback when all uploads are complete
-  const handleAllUploadsComplete = React.useCallback(() => {
-    refetch();
-  }, [refetch]);
+  // Ensure root folder is always expanded when documents load
+  React.useEffect(() => {
+    if (documents.length > 0) {
+      setExpanded((prev) => new Set([...prev, 'all-files-root']));
+    }
+  }, [documents]);
 
-  const { uploads, addFiles, clearCompleted } = useUploadQueue(5, handleAllUploadsComplete);
-
-  const [expanded, setExpanded] = React.useState<ExpandedState>({});
-
-  const handleFilesAppend = async (newFiles: File[], folderName?: string) => {
-    // Add files to the upload queue for parallel processing
-    addFiles(newFiles, folderName);
+  const handleToggle = (id: string) => {
+    const newExpanded = new Set(expanded);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
+    } else {
+      newExpanded.add(id);
+    }
+    setExpanded(newExpanded);
   };
 
-  const columns = React.useMemo<ColumnDef<DocumentNode>[]>(
-    () => [
-      {
-        id: 'name',
-        header: () => <span>Name</span>,
-        cell: ({ row }) => {
-          const isFolder = row.original.type === 'folder';
-          const hasChildren = !!row.original.children?.length;
-          const expanded = row.getIsExpanded();
-          return (
-            <div
-              style={{ paddingLeft: `${row.depth * 1.25}rem` }}
-              className={`flex items-center gap-1.5`}
-            >
-              {hasChildren ? (
-                <button
-                  onClick={row.getToggleExpandedHandler()}
-                  className='w-5 h-5 flex items-center justify-center rounded hover:bg-gray-200 text-gray-600'
-                  aria-label={expanded ? 'Collapse' : 'Expand'}
-                  type='button'
-                >
-                  {expanded ? (
-                    <ChevronDown className='h-4 w-4' />
-                  ) : (
-                    <ChevronRight className='h-4 w-4' />
-                  )}
-                </button>
-              ) : (
-                <span className='w-5 h-5 inline-flex items-center justify-center text-gray-300' />
-              )}
-              {isFolder ? (
-                <Folder className='h-4 w-4 text-orange-600' />
-              ) : (
-                <FileText className='h-4 w-4 text-gray-400' />
-              )}
-              <span
-                className={
-                  isFolder
-                    ? 'font-medium text-gray-900'
-                    : 'text-gray-700 cursor-pointer hover:underline'
-                }
-                onClick={() => {
-                  if (!isFolder && onFileClick) {
-                    onFileClick(row.original as FileNode);
-                  }
-                }}
-                role={!isFolder ? 'button' : undefined}
-                tabIndex={!isFolder ? 0 : undefined}
-                onKeyDown={(e) => {
-                  if (!isFolder && (e.key === 'Enter' || e.key === ' ')) {
-                    e.preventDefault();
-                    onFileClick?.(row.original as FileNode);
-                  }
-                }}
-              >
-                {row.original.name}
-              </span>
-            </div>
-          );
-        },
-        accessorFn: (row: DocumentNode) => row.name,
-      },
-      {
-        id: 'fileType',
-        header: () => <span>File Type</span>,
-        accessorFn: (row) => row.file_type,
-        cell: ({ getValue }) => {
-          const fileType = getValue() as string;
-          return <span className='text-gray-500 text-sm capitalize'>{fileType}</span>;
-        },
-      },
-      {
-        id: 'createdAt',
-        header: () => <span>Created</span>,
-        accessorKey: 'created_at',
-        cell: ({ getValue }) => {
-          const createdAt = getValue() as string;
-          return <span className='text-gray-500 text-sm'>{parseISOWithMicros(createdAt)}</span>;
-        },
-      },
-    ],
-    [onFileClick],
-  );
+  const handleFileSelect = (file: FileNode) => {
+    setSelectedFile(file);
+    onFileClick?.(file);
+  };
 
-  const table = useReactTable({
-    data: documents,
-    columns,
-    state: { expanded },
-    getSubRows: (row) => row.children ?? [],
-    onExpandedChange: setExpanded,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-  });
+  const handleFolderClick = (folder: FolderNode) => {
+    setCurrentFolder(folder);
+    onFolderClick?.(folder);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleFolderViewFolderClick = (folderId: string, _folderName: string) => {
+    // Find the folder in current folder's children
+    const targetFolder = currentFolder?.children?.find(
+      (child) => child.id === folderId && child.type === 'folder',
+    ) as FolderNode;
+
+    if (targetFolder) {
+      setCurrentFolder(targetFolder);
+    }
+  };
 
   return (
-    <section className='rounded-lg border border-gray-200 bg-white shadow-sm'>
-      <header className='p-4 bg-gray-100'>
-        <h1 className='text-xl font-semibold'>Vault</h1>
+    <section className='h-full flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm'>
+      {/* Header */}
+      <header className='flex-shrink-0 px-4 py-3 bg-gray-100 border-b border-gray-200 rounded-t-lg'>
+        <h1 className='text-xl font-semibold text-gray-900'>Document Vault</h1>
       </header>
-      <main className='flex-1 overflow-y-auto'>
-        <UploadDropZone
-          allowFileTypes={ALLOWED_FILE_TYPES}
-          onUploadFiles={handleFilesAppend}
-          allowFolders={true}
-        />
 
-        {/* Table */}
-        <div className='overflow-x-auto rounded border border-gray-200 bg-white mx-3 mb-4'>
-          {loading ? (
-            <div className='flex items-center justify-center py-12'>
-              <div className='flex items-center gap-2 text-gray-500'>
-                <Loader2 className='h-5 w-5 animate-spin' />
-                <span>Loading documents...</span>
-              </div>
+      {/* Main Content Area */}
+      <div className='flex-1 flex min-h-0'>
+        {/* Left Navigation Panel */}
+        <div className='w-full flex flex-col border-r border-gray-200 bg-gray-50'>
+          <>
+            {/* Navigation Tree */}
+            <div className='flex-1 overflow-y-auto p-3'>
+              {areDocumentsLoading ? (
+                <div className='flex items-center justify-center py-8'>
+                  <div className='flex items-center gap-2 text-gray-500'>
+                    <Loader2 className='h-5 w-5 animate-spin' />
+                    <span className='text-sm'>Loading documents...</span>
+                  </div>
+                </div>
+              ) : documents.length === 0 ? (
+                <div className='flex items-center justify-center py-8'>
+                  <div className='text-center text-gray-500'>
+                    <Folder className='h-8 w-8 mx-auto mb-2 text-gray-300' />
+                    <p className='text-sm font-medium'>No documents found</p>
+                    <p className='text-xs'>Upload some documents to get started</p>
+                  </div>
+                </div>
+              ) : (
+                <div className='space-y-1'>
+                  {documents.map((node) => (
+                    <TreeNode
+                      key={node.id}
+                      node={node}
+                      level={0}
+                      expanded={expanded}
+                      onToggle={handleToggle}
+                      onFileClick={handleFileSelect}
+                      onFolderClick={handleFolderClick}
+                      selectedFile={selectedFile}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          ) : documents.length === 0 ? (
-            <div className='flex items-center justify-center py-12'>
-              <div className='text-center text-gray-500'>
-                <FileText className='h-12 w-12 mx-auto mb-3 text-gray-300' />
-                <p className='text-lg font-medium'>No documents found</p>
-                <p className='text-sm'>Upload some documents to get started</p>
-              </div>
-            </div>
-          ) : (
-            <table className='w-full text-sm'>
-              <thead className='bg-gray-50 text-gray-700'>
-                {table.getHeaderGroups().map((hg) => (
-                  <tr key={hg.id}>
-                    {hg.headers.map((header) => (
-                      <th
-                        key={header.id}
-                        className='py-2 px-3 text-left font-medium text-xs tracking-wide'
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </th>
-                    ))}
-                  </tr>
-                ))}
-              </thead>
-              <tbody className='divide-y divide-gray-100'>
-                {table.getRowModel().rows.map((row) => (
-                  <tr key={row.id} className='hover:bg-gray-50'>
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className='py-2 px-3 align-top'>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+          </>
         </div>
-      </main>
-
-      {/* Upload Progress Indicator */}
-      <UploadProgressIndicator uploads={uploads} onClearCompleted={clearCompleted} />
+      </div>
     </section>
   );
 }
