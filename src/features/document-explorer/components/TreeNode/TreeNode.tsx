@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { DocumentNode, FileNode, FolderNode } from '../../interfaces/common';
-import { ChevronRight, ChevronDown, FolderOpen } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FolderOpen } from 'lucide-react';
 
 export interface TreeNodeProps {
   node: DocumentNode;
@@ -37,14 +37,20 @@ export const TreeNode: React.FC<TreeNodeProps> = ({
   return (
     <div>
       <div
-        className={`flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-100 transition-colors ${
-          isSelected ? 'bg-orange-100 text-orange-800' : 'text-gray-700'
+        className={`flex items-center gap-2 px-3 py-2.5 rounded-lg transition-all duration-200 group ${
+          isSelected
+            ? 'bg-orange-100 text-orange-900 shadow-sm ring-1 ring-orange-200'
+            : 'text-gray-700 hover:bg-orange-50 hover:text-orange-800'
         }`}
-        style={{ paddingLeft: `${level * 1.25 + 0.5}rem` }}
+        style={{ paddingLeft: `${level * 1.5 + 0.75}rem` }}
       >
         {hasChildren ? (
           <button
-            className='w-4 h-4 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer'
+            className={`w-5 h-5 flex items-center justify-center rounded transition-colors ${
+              isSelected
+                ? 'text-orange-600 hover:text-orange-700'
+                : 'text-gray-400 hover:text-gray-600 group-hover:text-orange-500'
+            }`}
             aria-label={isExpanded ? 'Collapse' : 'Expand'}
             onClick={(e) => {
               e.stopPropagation();
@@ -52,42 +58,76 @@ export const TreeNode: React.FC<TreeNodeProps> = ({
             }}
           >
             {isExpanded ? (
-              <ChevronDown className='h-3 w-3' />
+              <ChevronDown className='h-4 w-4' />
             ) : (
-              <ChevronRight className='h-3 w-3' />
+              <ChevronRight className='h-4 w-4' />
             )}
           </button>
         ) : (
-          <span className='w-4 h-4' />
+          <span className='w-5 h-5 flex items-center justify-center'>
+            <div className='w-1.5 h-1.5 bg-gray-300 rounded-full group-hover:bg-orange-400 transition-colors' />
+          </span>
         )}
 
         <div
-          className='flex items-center gap-2 flex-1 cursor-pointer'
+          className='flex items-center gap-2.5 flex-1 cursor-pointer min-w-0'
           onClick={() => {
             if (onFolderClick) {
               onFolderClick(node as FolderNode);
             }
           }}
         >
-          <FolderOpen className={`h-4 w-4 ${isExpanded ? 'text-orange-600' : 'text-orange-500'}`} />
+          <div
+            className={`flex-shrink-0 transition-colors ${
+              isExpanded && isSelected
+                ? 'text-orange-600'
+                : isExpanded
+                ? 'text-orange-500'
+                : isSelected
+                ? 'text-orange-500'
+                : 'text-orange-400 group-hover:text-orange-500'
+            }`}
+          >
+            {isExpanded ? <FolderOpen className='h-4 w-4' /> : <Folder className='h-4 w-4' />}
+          </div>
 
-          <span className='text-sm truncate font-medium'>{node.name}</span>
+          <span
+            className={`text-sm font-medium truncate ${
+              isSelected ? 'text-orange-900' : 'text-gray-700 group-hover:text-orange-800'
+            }`}
+          >
+            {node.name}
+          </span>
+
+          {/* Item count badge */}
+          {node.children && node.children.length > 0 && (
+            <span
+              className={`ml-auto flex-shrink-0 px-2 py-0.5 text-xs rounded-full font-medium transition-colors ${
+                isSelected
+                  ? 'bg-orange-200 text-orange-800'
+                  : 'bg-gray-200 text-gray-600 group-hover:bg-orange-100 group-hover:text-orange-700'
+              }`}
+            >
+              {node.children.length}
+            </span>
+          )}
         </div>
       </div>
 
       {hasChildren && isExpanded && (
-        <div>
+        <div className='ml-2 border-l border-gray-200 group-hover:border-orange-200 transition-colors'>
           {folderChildren.map((child) => (
-            <TreeNode
-              key={child.id}
-              node={child}
-              level={level + 1}
-              expanded={expanded}
-              onToggle={onToggle}
-              onFileClick={onFileClick}
-              onFolderClick={onFolderClick}
-              selectedFile={selectedFile}
-            />
+            <div key={child.id} className='pl-0.5'>
+              <TreeNode
+                node={child}
+                level={level + 1}
+                expanded={expanded}
+                onToggle={onToggle}
+                onFileClick={onFileClick}
+                onFolderClick={onFolderClick}
+                selectedFile={selectedFile}
+              />
+            </div>
           ))}
         </div>
       )}

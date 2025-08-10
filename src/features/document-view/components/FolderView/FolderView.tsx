@@ -72,7 +72,7 @@ const FolderItem: React.FC<{
 
       <div className='mb-3 flex-shrink-0'>
         {item.type === 'folder' ? (
-          <Folder className='w-12 h-12 text-yellow-500' fill='currentColor' />
+          <Folder className='w-12 h-12 text-orange-400' fill='currentColor' />
         ) : (
           <div className='bg-gray-50 rounded-lg p-2'>{getFileIcon(item.fileType)}</div>
         )}

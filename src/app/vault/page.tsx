@@ -8,8 +8,11 @@ import { FileNode, FolderNode } from '@/features/document-explorer/interfaces';
 import { useFolderNavigation } from '@/features/document-view/hooks';
 import { useUploadQueue } from '@/features/document-explorer/hooks/useUploadQueue';
 import { useDocumentData } from '@/features/document-explorer/hooks/useDocumentData';
+import { useToastHelpers } from '@/components/ui';
 
 export default function VaultPage() {
+  const { showSuccess } = useToastHelpers();
+
   const [showDocumentViewer, toggleDocumentViewer] = useState(false);
   const [selectedFile, setSelectedFile] = useState<FileNode | null>(null);
   const {
@@ -45,6 +48,7 @@ export default function VaultPage() {
         folder_name: newFolderName,
         parent_folder_id: currentFolder?.id !== 'all-files-root' ? currentFolder?.id : undefined,
       });
+      showSuccess('Folder created', 'Your new folder has been created successfully.');
     }
     addFiles(files, {
       currentFolderId: folderResponse?.id || currentFolder?.id,

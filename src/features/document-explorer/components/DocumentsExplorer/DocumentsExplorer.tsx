@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { DocumentNode, FileNode, FolderNode } from '../../interfaces/common';
-import { Folder, Loader2 } from 'lucide-react';
+import { Folder, Loader2, FolderOpen, Search } from 'lucide-react';
 import { TreeNode } from '../TreeNode';
 
 export function DocumentsExplorer({
@@ -16,7 +16,7 @@ export function DocumentsExplorer({
 }) {
   const [expanded, setExpanded] = React.useState<Set<string>>(new Set(['all-files-root']));
   const [selectedFile, setSelectedFile] = React.useState<FileNode | null>(null);
-  const [currentFolder, setCurrentFolder] = React.useState<FolderNode | null>(null);
+  const [_currentFolder, setCurrentFolder] = React.useState<FolderNode | null>(null);
 
   // Ensure root folder is always expanded when documents load
   React.useEffect(() => {
@@ -45,48 +45,39 @@ export function DocumentsExplorer({
     onFolderClick?.(folder);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleFolderViewFolderClick = (folderId: string, _folderName: string) => {
-    // Find the folder in current folder's children
-    const targetFolder = currentFolder?.children?.find(
-      (child) => child.id === folderId && child.type === 'folder',
-    ) as FolderNode;
-
-    if (targetFolder) {
-      setCurrentFolder(targetFolder);
-    }
-  };
-
   return (
-    <section className='h-full flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm'>
-      {/* Header */}
-      <header className='flex-shrink-0 px-4 py-3 bg-gray-100 border-b border-gray-200 rounded-t-lg'>
-        <h1 className='text-xl font-semibold text-gray-900'>Document Vault</h1>
+    <section className='h-full flex flex-col bg-white rounded-xl shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] border border-gray-200/50 overflow-hidden'>
+      {/* Header with gradient background */}
+      <header className='flex-shrink-0 px-6 py-4 bg-gradient-to-r from-orange-50 to-orange-100/50 border-b border-orange-200/30'>
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-3'>
+            <div className='p-2 bg-orange-500 rounded-lg shadow-sm'>
+              <FolderOpen className='h-5 w-5 text-white' />
+            </div>
+            <div>
+              <h1 className='text-xl font-semibold text-gray-900'>Document Explorer</h1>
+            </div>
+          </div>
+        </div>
       </header>
 
       {/* Main Content Area */}
       <div className='flex-1 flex min-h-0'>
-        {/* Left Navigation Panel */}
-        <div className='w-full flex flex-col border-r border-gray-200 bg-gray-50'>
-          <>
-            {/* Navigation Tree */}
-            <div className='flex-1 overflow-y-auto p-3'>
-              {areDocumentsLoading ? (
-                <div className='flex items-center justify-center py-8'>
-                  <div className='flex items-center gap-2 text-gray-500'>
-                    <Loader2 className='h-5 w-5 animate-spin' />
-                    <span className='text-sm'>Loading documents...</span>
-                  </div>
+        {/* Navigation Panel */}
+        <div className='w-full flex flex-col bg-gradient-to-b from-gray-50/50 to-white'>
+          <div className='flex-1 overflow-y-auto'>
+            {areDocumentsLoading ? (
+              <div className='flex flex-col items-center justify-center py-16 px-6'>
+                <div className='bg-orange-50 p-4 rounded-full mb-4'>
+                  <Loader2 className='h-8 w-8 text-orange-500 animate-spin' />
                 </div>
-              ) : documents.length === 0 ? (
-                <div className='flex items-center justify-center py-8'>
-                  <div className='text-center text-gray-500'>
-                    <Folder className='h-8 w-8 mx-auto mb-2 text-gray-300' />
-                    <p className='text-sm font-medium'>No documents found</p>
-                    <p className='text-xs'>Upload some documents to get started</p>
-                  </div>
-                </div>
-              ) : (
+                <h3 className='text-lg font-medium text-gray-900 mb-2'>Loading your documents</h3>
+                <p className='text-sm text-gray-600 text-center'>
+                  Please wait while we fetch your files...
+                </p>
+              </div>
+            ) : (
+              <div className='p-4'>
                 <div className='space-y-1'>
                   {documents.map((node) => (
                     <TreeNode
@@ -101,9 +92,9 @@ export function DocumentsExplorer({
                     />
                   ))}
                 </div>
-              )}
-            </div>
-          </>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>

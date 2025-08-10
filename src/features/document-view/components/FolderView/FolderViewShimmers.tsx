@@ -51,7 +51,7 @@ const FolderShimmerCard: React.FC = () => {
   return (
     <div className='bg-white rounded-lg border border-gray-200 p-4 flex flex-col items-center text-center min-h-[140px] animate-pulse'>
       <div className='mb-3 flex-shrink-0'>
-        <div className='w-12 h-12 bg-yellow-200 rounded animate-pulse'></div>
+        <div className='w-12 h-12 bg-orange-200 rounded animate-pulse'></div>
       </div>
       <div className='flex-1 flex flex-col justify-between w-full'>
         <div className='w-3/4 h-4 bg-gray-200 rounded animate-pulse mb-2 mx-auto'></div>
