@@ -1,4 +1,4 @@
-import { axiosClient } from '@/lib/axiosClient';
+import { uploadDocument, UploadMetadata } from '@/data/api';
 
 export interface UploadProgress {
   id: string;
@@ -12,10 +12,7 @@ export interface UploadProgress {
 export interface UploadQueueItem {
   id: string;
   file: File;
-  metaData: {
-    newFolderName?: string;
-    currentFolderId?: string;
-  };
+  metaData: UploadMetadata;
 }
 
 export class UploadQueue {
@@ -47,7 +44,10 @@ export class UploadQueue {
 
     files.forEach((file) => {
       const id = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const queueItem: UploadQueueItem = { id, file, metaData };
+      const uploadMetaData: UploadMetadata = {
+        current_folder_id: metaData.currentFolderId,
+      };
+      const queueItem: UploadQueueItem = { id, file, metaData: uploadMetaData };
 
       this.queue.push(queueItem);
       this.progressMap.set(id, {
@@ -86,20 +86,8 @@ export class UploadQueue {
     try {
       // Update status to uploading
       this.updateProgress(id, { status: 'uploading', progress: 0 });
-      const { currentFolderId } = metaData;
-      const formData = new FormData();
-      formData.append('file', file);
-      let formMetaData = {};
 
-      const folderId = currentFolderId || null;
-      formMetaData = { ...formMetaData, current_folder_id: folderId };
-
-      formData.append('meta_data', JSON.stringify(formMetaData));
-
-      const response = await axiosClient.post('/api/v1/documents/create', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      const response = await uploadDocument(file, metaData, {
         signal: abortController.signal,
         onUploadProgress: (progressEvent) => {
           if (progressEvent.total) {
@@ -116,7 +104,7 @@ export class UploadQueue {
       this.updateProgress(id, {
         status: 'completed',
         progress: 100,
-        result: response.data,
+        result: response,
       });
     } catch (error) {
       // Handle upload error

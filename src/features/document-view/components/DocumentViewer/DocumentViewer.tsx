@@ -5,6 +5,8 @@ import { PreviewView } from '../PreviewView/PreviewView';
 import { FileDetailsView } from '../FileDetailsView/FileDetailsView';
 import { MarkdownRawText } from '../MarkdownRawText/MarkdownRawText';
 import { useGetDocumentSummary } from '../../hooks';
+import { useGetDocumentInsights } from '../../hooks/useGetDocumentInsights';
+import Insights from '../Insights/Insights';
 
 interface DocumentViewerProps {
   documentId: string;
@@ -26,7 +28,15 @@ export function DocumentViewer({
   onClose,
 }: DocumentViewerProps) {
   const [tab, setTab] = React.useState<'summary' | 'preview' | 'details'>('preview');
-  const { summary, loading, error } = useGetDocumentSummary({ documentId });
+  const { summary, loading: isSummaryDataLoading, error } = useGetDocumentSummary({ documentId });
+  const { insights, fetchInsights } = useGetDocumentInsights({ documentId });
+
+  React.useEffect(() => {
+    if (summary) {
+      // Show loading state
+      fetchInsights();
+    }
+  }, [summary, fetchInsights]);
 
   return (
     <div className='flex flex-col border border-gray-200 rounded-lg bg-white shadow-sm h-full'>
@@ -62,6 +72,27 @@ export function DocumentViewer({
           <TabsTrigger value='preview'>Preview</TabsTrigger>
           <TabsTrigger value='summary'>Summary</TabsTrigger>
           <TabsTrigger value='markdown'>Markdown</TabsTrigger>
+          {insights && (
+            <TabsTrigger value='insights'>
+              <div className='flex'>
+                <svg
+                  className='w-4 h-4 mr-2'
+                  fill='none'
+                  stroke='currentColor'
+                  viewBox='0 0 24 24'
+                  xmlns='http://www.w3.org/2000/svg'
+                >
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth={2}
+                    d='M13 10V3L4 14h7v7l9-11h-7z'
+                  />
+                </svg>
+                Insights
+              </div>
+            </TabsTrigger>
+          )}
           <TabsTrigger value='details'>Details</TabsTrigger>
         </TabsList>
         <div className='p-5 flex-1 min-h-0'>
@@ -69,11 +100,16 @@ export function DocumentViewer({
             <PreviewView storagePath={storagePath} fileName={fileName} fileType={fileType} />
           </TabsContent>
           <TabsContent value='summary' className='h-full'>
-            <SummaryView summary={summary} loading={loading} error={error} />
+            <SummaryView summary={summary} loading={isSummaryDataLoading} error={error} />
           </TabsContent>
           <TabsContent value='markdown' className='h-full'>
             <MarkdownRawText markdown={summary} />
           </TabsContent>
+          {insights && (
+            <TabsContent value='insights' className='h-full'>
+              <Insights insights={insights} />
+            </TabsContent>
+          )}
           <TabsContent value='details' className='h-full'>
             <FileDetailsView
               fileName={fileName}

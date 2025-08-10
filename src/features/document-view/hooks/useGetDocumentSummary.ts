@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { axiosClient } from '@/lib/axiosClient';
+import { getDocumentSummary } from '@/data/api';
 import { mockSummary } from '../utils/mockSummary';
 
 export function useGetDocumentSummary({ documentId }: { documentId: string }) {
@@ -11,10 +11,8 @@ export function useGetDocumentSummary({ documentId }: { documentId: string }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axiosClient.get<{ summary: string }>(
-        `/api/v1/documents/${documentId}/summary`,
-      );
-      setSummary(response.data.summary);
+      const response = await getDocumentSummary(documentId);
+      setSummary(response.summary);
       setError(null);
     } catch (error) {
       console.error('Error fetching document summary:', error);

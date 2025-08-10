@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { axiosClient } from '@/lib/axiosClient';
+import { createFolder } from '@/data/api';
 import { ALLOWED_FILE_TYPES } from '@/lib/constants';
 import { DocumentsExplorer } from '@features/document-explorer/components';
 import { DocumentViewer, FolderView } from '@features/document-view/components/';
@@ -41,13 +41,13 @@ export default function VaultPage() {
     // Add files to the upload queue for parallel processing
     let folderResponse = null;
     if (newFolderName) {
-      folderResponse = await axiosClient.post('api/v1/folders/create', {
+      folderResponse = await createFolder({
         folder_name: newFolderName,
         parent_folder_id: currentFolder?.id !== 'all-files-root' ? currentFolder?.id : undefined,
       });
     }
     addFiles(files, {
-      currentFolderId: folderResponse?.data?.id || currentFolder?.id,
+      currentFolderId: folderResponse?.id || currentFolder?.id,
     });
   };
 

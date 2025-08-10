@@ -29,6 +29,7 @@ export const useFolderNavigation = ({
   const [folderName, setFolderName] = useState<string>('Root');
   const [folderItems, setFolderItems] = useState<FolderItem[]>([]);
   const [folderHistory, setFolderHistory] = useState<FolderNode[]>([]);
+
   // Get documents data to access the "All files" root folder
   // Initialize with the "All files" root folder as the default view
   useEffect(() => {
@@ -45,6 +46,23 @@ export const useFolderNavigation = ({
       }
     }
   }, [documents, areDocumentsLoaded, currentFolder]);
+
+  // Get documents data to access the "All files" root folder
+  // Initialize with the "All files" root folder as the default view
+  useEffect(() => {
+    if (documents.length > 0 && areDocumentsLoaded) {
+      const allFilesRootFolder = documents.find((doc) => doc.id === 'all-files-root') as FolderNode;
+      if (allFilesRootFolder) {
+        setCurrentFolder(allFilesRootFolder);
+        setFolderName(allFilesRootFolder.name);
+        setLoading(false);
+        const items = getFolderChildren(allFilesRootFolder);
+        if (items.length > 0) {
+          setFolderItems(items);
+        }
+      }
+    }
+  }, [documents, areDocumentsLoaded]);
 
   const navigateToFolder = useCallback(
     (folder: FolderNode) => {

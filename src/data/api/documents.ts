@@ -1,7 +1,7 @@
 import { Document } from '@/lib/types';
 import { axiosClient } from '@/lib/axiosClient';
 
-// Upload API interfaces
+// Document API interfaces
 export interface UploadMetadata {
   current_folder_id?: string | null;
   newFolderName?: string;
@@ -46,5 +46,17 @@ export async function uploadDocument(
     onUploadProgress: options?.onUploadProgress,
   });
 
+  return response.data;
+}
+
+// Get document summary function
+export async function getDocumentSummary(id: string): Promise<{ summary: string }> {
+  const response = await axiosClient.get<{ summary: string }>(`/api/v1/documents/${id}/summary`);
+  return response.data;
+}
+
+// Get document Insights function
+export async function getDocumentInsights(id: string): Promise<{ insights: string }> {
+  const response = await axiosClient.get<{ insights: string }>(`/api/v1/documents/${id}/insights`);
   return response.data;
 }
