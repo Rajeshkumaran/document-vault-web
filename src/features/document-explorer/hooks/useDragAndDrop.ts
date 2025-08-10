@@ -1,5 +1,16 @@
 import * as React from 'react';
 
+// Simple types for FileSystem API support
+interface FileSystemEntryLike {
+  isFile: boolean;
+  isDirectory: boolean;
+  name: string;
+  file?: (callback: (file: File) => void) => void;
+  createReader?: () => {
+    readEntries: (callback: (entries: FileSystemEntryLike[]) => void) => void;
+  };
+}
+
 interface UseDragAndDropOptions {
   allowFileTypes: string[];
   onUploadFiles: (files: File[], folderName?: string) => void;
@@ -122,14 +133,74 @@ export const useDragAndDrop = ({
   }, []);
 
   const handleDrop = React.useCallback(
-    (e: React.DragEvent) => {
+    async (e: React.DragEvent) => {
       e.preventDefault();
       e.stopPropagation();
       setDragActive(false);
-      const files = Array.from(e.dataTransfer.files ?? []);
-      handleFiles(files);
+
+      const items = Array.from(e.dataTransfer.items);
+      const files: File[] = [];
+
+      // Check if we have DataTransferItems and webkitGetAsEntry support
+      const hasWebkitSupport = items.length > 0 && 'webkitGetAsEntry' in items[0];
+
+      if (hasWebkitSupport) {
+        // Use the FileSystem API for better folder support
+        const entries = items
+          .map((item) => {
+            // Type assertion for webkitGetAsEntry which may not be in all DataTransferItem types
+            const itemWithWebkit = item as DataTransferItem & {
+              webkitGetAsEntry?: () => FileSystemEntryLike | null;
+            };
+            const entry = itemWithWebkit.webkitGetAsEntry?.();
+            return entry as FileSystemEntryLike | null;
+          })
+          .filter((entry): entry is FileSystemEntryLike => entry !== null);
+
+        const processEntry = async (entry: FileSystemEntryLike, folderPath = ''): Promise<void> => {
+          if (entry.isFile && entry.file) {
+            return new Promise<void>((resolve) => {
+              entry.file!((file: File) => {
+                // Create a new file with the correct webkitRelativePath
+                const newFile = new File([file], file.name, {
+                  type: file.type,
+                  lastModified: file.lastModified,
+                });
+                // Add the path information
+                Object.defineProperty(newFile, 'webkitRelativePath', {
+                  value: folderPath ? `${folderPath}/${file.name}` : file.name,
+                  writable: false,
+                });
+                files.push(newFile);
+                resolve();
+              });
+            });
+          } else if (entry.isDirectory && entry.createReader) {
+            const reader = entry.createReader();
+            return new Promise<void>((resolve) => {
+              reader.readEntries(async (entries: FileSystemEntryLike[]) => {
+                const newFolderPath = folderPath ? `${folderPath}/${entry.name}` : entry.name;
+                await Promise.all(entries.map((subEntry) => processEntry(subEntry, newFolderPath)));
+                resolve();
+              });
+            });
+          }
+        };
+
+        try {
+          await Promise.all(entries.map((entry) => processEntry(entry)));
+          handleFiles(files);
+        } catch (error) {
+          console.error('Error processing dropped folders:', error);
+          setError('Error processing dropped folders. Please try again.');
+        }
+      } else {
+        // Fallback to the original method for simple file drops
+        const files = Array.from(e.dataTransfer.files ?? []);
+        handleFiles(files);
+      }
     },
-    [handleFiles],
+    [handleFiles, setError],
   );
 
   const clearError = React.useCallback(() => {

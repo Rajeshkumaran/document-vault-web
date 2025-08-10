@@ -9,7 +9,7 @@ import {
 } from '@tanstack/react-table';
 import { useDocumentData } from '../../hooks/useDocumentData';
 import { DocumentNode, FileNode } from '../../interfaces/common';
-import { Folder, FileText, ChevronRight, ChevronDown } from 'lucide-react';
+import { Folder, FileText, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
 import { UploadDropZone } from '../UploadDropZone/UploadDropZone';
 import { UploadProgressIndicator } from '../UploadProgressIndicator/UploadProgressIndicator';
 import { useUploadQueue } from '../../hooks/useUploadQueue';
@@ -17,7 +17,7 @@ import { ALLOWED_FILE_TYPES } from '@/lib/constants';
 import { parseISOWithMicros } from '../../utils/helpers';
 
 export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNode) => void }) {
-  const { documents, refetch } = useDocumentData();
+  const { documents, loading, refetch } = useDocumentData();
 
   // Callback when all uploads are complete
   const handleAllUploadsComplete = React.useCallback(() => {
@@ -141,35 +141,52 @@ export function DocumentsExplorer({ onFileClick }: { onFileClick?: (file: FileNo
 
         {/* Table */}
         <div className='overflow-x-auto rounded border border-gray-200 bg-white mx-3 mb-4'>
-          <table className='w-full text-sm'>
-            <thead className='bg-gray-50 text-gray-700'>
-              {table.getHeaderGroups().map((hg) => (
-                <tr key={hg.id}>
-                  {hg.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className='py-2 px-3 text-left font-medium text-xs tracking-wide'
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody className='divide-y divide-gray-100'>
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className='hover:bg-gray-50'>
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className='py-2 px-3 align-top'>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {loading ? (
+            <div className='flex items-center justify-center py-12'>
+              <div className='flex items-center gap-2 text-gray-500'>
+                <Loader2 className='h-5 w-5 animate-spin' />
+                <span>Loading documents...</span>
+              </div>
+            </div>
+          ) : documents.length === 0 ? (
+            <div className='flex items-center justify-center py-12'>
+              <div className='text-center text-gray-500'>
+                <FileText className='h-12 w-12 mx-auto mb-3 text-gray-300' />
+                <p className='text-lg font-medium'>No documents found</p>
+                <p className='text-sm'>Upload some documents to get started</p>
+              </div>
+            </div>
+          ) : (
+            <table className='w-full text-sm'>
+              <thead className='bg-gray-50 text-gray-700'>
+                {table.getHeaderGroups().map((hg) => (
+                  <tr key={hg.id}>
+                    {hg.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className='py-2 px-3 text-left font-medium text-xs tracking-wide'
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody className='divide-y divide-gray-100'>
+                {table.getRowModel().rows.map((row) => (
+                  <tr key={row.id} className='hover:bg-gray-50'>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className='py-2 px-3 align-top'>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </main>
 
