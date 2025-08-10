@@ -1,18 +1,16 @@
 import * as React from 'react';
 import { Loader2 } from 'lucide-react';
-import { useGetDocumentSummary } from '../../hooks/useGetDocumentSummary';
 import { MarkdownRenderer } from '../MarkdownRenderer/MarkdownRenderer';
 
-const SummaryViewComponent = ({ documentId }: { documentId: string }) => {
-  const { summary, loading, error } = useGetDocumentSummary({ documentId });
-
-  React.useEffect(() => {
-    console.log('Debugger SummaryView mounted');
-    return () => {
-      console.log('Debugger SummaryView unmounted');
-    };
-  }, []);
-
+const SummaryViewComponent = ({
+  summary,
+  loading,
+  error,
+}: {
+  summary: string;
+  loading: boolean;
+  error: string | null;
+}) => {
   if (loading) {
     return (
       <div className='flex items-center justify-center h-64'>
@@ -76,6 +74,14 @@ const SummaryViewComponent = ({ documentId }: { documentId: string }) => {
 
   return (
     <div className='space-y-6'>
+      <div className='flex items-center justify-between mb-4'>
+        <div className='flex items-center space-x-2'>
+          <div className='w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full animate-pulse'></div>
+          <span className='text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full'>
+            AI Generated Summary
+          </span>
+        </div>
+      </div>
       <section className='prose prose-sm max-w-none max-h-[550px] overflow-y-auto'>
         <div className='whitespace-pre-wrap text-gray-700 leading-relaxed'>
           <MarkdownRenderer markdown={summary} />

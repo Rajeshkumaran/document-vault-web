@@ -110,6 +110,10 @@ export default function VaultPage() {
               fileType={selectedFile.file_type}
               createdAt={selectedFile.createdAt}
               fileUrl={selectedFile.url}
+              onClose={() => {
+                setSelectedFile(null);
+                toggleDocumentViewer(false);
+              }}
             />
           </div>
         )}

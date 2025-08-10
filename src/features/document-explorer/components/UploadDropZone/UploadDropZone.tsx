@@ -30,7 +30,19 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
 
   const handleFolderInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    handleFiles(files);
+
+    // Extract folder name from the first file's path for folder uploads
+    let folderName: string | undefined;
+    if (files.length > 0 && files[0].webkitRelativePath) {
+      const pathParts = files[0].webkitRelativePath.split('/');
+      if (pathParts.length > 1) {
+        folderName = pathParts[0];
+      }
+    }
+
+    console.log('Extracted folder name:', folderName);
+
+    handleFiles(files, folderName);
     e.target.value = '';
   };
 
@@ -39,7 +51,19 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
   };
 
   const openFolderDialog = () => {
-    folderInputRef.current?.click();
+    console.log('Opening folder dialog');
+    if (folderInputRef.current) {
+      // Ensure the element is properly configured before clicking
+      const element = folderInputRef.current;
+      console.log('Folder input attributes:', {
+        webkitdirectory: element.getAttribute('webkitdirectory'),
+        directory: element.getAttribute('directory'),
+        multiple: element.getAttribute('multiple'),
+      });
+      element.click();
+    } else {
+      console.error('Folder input ref is null');
+    }
   };
 
   return (
@@ -111,11 +135,13 @@ export const UploadDropZone: React.FC<UploadDropZoneProps> = ({
           ref={(el) => {
             folderInputRef.current = el;
             if (el) {
+              // Ensure the webkitdirectory attribute is set immediately
               el.setAttribute('webkitdirectory', 'true');
+              el.setAttribute('directory', 'true'); // Additional attribute for broader support
+              el.setAttribute('multiple', 'true');
             }
           }}
           type='file'
-          multiple
           onChange={handleFolderInputChange}
           className='hidden'
         />
